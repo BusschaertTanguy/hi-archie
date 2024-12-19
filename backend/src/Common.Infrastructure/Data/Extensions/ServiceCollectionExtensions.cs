@@ -12,7 +12,8 @@ namespace Common.Infrastructure.Data.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCommonInfrastructureData(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddCommonInfrastructureData(this IServiceCollection services,
+        string connectionString)
     {
         return services
             .AddDbContext<AppDbContext>(builder => builder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention())

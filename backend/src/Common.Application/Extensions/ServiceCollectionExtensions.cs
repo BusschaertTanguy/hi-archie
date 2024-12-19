@@ -10,12 +10,15 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCommandHandlersFromAssembly(this IServiceCollection services, Assembly assembly)
     {
         var handlers = assembly.GetTypes()
-            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandHandler<>)))
+            .Where(type =>
+                type.GetInterfaces().Any(i =>
+                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandHandler<>)))
             .ToList();
 
         foreach (var handler in handlers)
         {
-            var handlerInterface = handler.GetInterfaces().Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandHandler<>));
+            var handlerInterface = handler.GetInterfaces().Single(i =>
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandHandler<>));
             services.AddTransient(handlerInterface, handler);
         }
 
@@ -25,12 +28,15 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddQueryHandlersFromAssembly(this IServiceCollection services, Assembly assembly)
     {
         var handlers = assembly.GetTypes()
-            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)))
+            .Where(type =>
+                type.GetInterfaces().Any(i =>
+                    i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)))
             .ToList();
 
         foreach (var handler in handlers)
         {
-            var handlerInterface = handler.GetInterfaces().Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
+            var handlerInterface = handler.GetInterfaces().Single(i =>
+                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>));
             services.AddTransient(handlerInterface, handler);
         }
 

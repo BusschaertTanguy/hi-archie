@@ -28,7 +28,8 @@ builder.Services
     .AddCommonInfrastructureData(connectionString)
     .AddCoreApplication();
 
-builder.Services.AddCors(options => options.AddPolicy("ClientPolicy", policyBuilder => policyBuilder.WithOrigins(clientUrl).AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options => options.AddPolicy("ClientPolicy",
+    policyBuilder => policyBuilder.WithOrigins(clientUrl).AllowAnyHeader().AllowAnyMethod()));
 
 if (builder.Environment.IsDevelopment())
 {

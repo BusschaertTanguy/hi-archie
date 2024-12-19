@@ -11,12 +11,12 @@ public class Result
 
     public static Result Success()
     {
-        return new();
+        return new Result();
     }
 
     public static Result Failure(string error)
     {
-        return new(error);
+        return new Result(error);
     }
 }
 
@@ -31,11 +31,11 @@ public sealed class Result<TData> : Result
 
     public static Result<TData> Success(TData data)
     {
-        return new(data, null);
+        return new Result<TData>(data, null);
     }
 
     public new static Result<TData> Failure(string error)
     {
-        return new(default, error);
+        return new Result<TData>(default, error);
     }
 }

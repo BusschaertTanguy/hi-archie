@@ -14,17 +14,18 @@ public static class GetCommunities
 
     public sealed record Response(List<Dto> Communities, long Total);
 
-    internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor) : IQueryHandler<Request, Response>
+    internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor)
+        : IQueryHandler<Request, Response>
     {
         public async Task<Result<Response>> HandleAsync(Request request)
         {
             var validationResult = await validator.ValidateAsync(request);
-            
+
             if (!validationResult.IsValid)
             {
                 return Result<Response>.Failure("validation-failed");
             }
-            
+
             var communitiesQuery = queryProcessor
                 .Query<Community>();
 
@@ -43,7 +44,7 @@ public static class GetCommunities
                 .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
                 .ToListAsync();
 
-            return Result<Response>.Success(new(communities, total));
+            return Result<Response>.Success(new Response(communities, total));
         }
     }
 

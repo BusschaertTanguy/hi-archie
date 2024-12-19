@@ -5,7 +5,8 @@ namespace Host.WebApi.Transformers;
 
 public class OptionalPropertySchemaTransformer : IOpenApiSchemaTransformer
 {
-    public Task TransformAsync(OpenApiSchema schema, OpenApiSchemaTransformerContext context, CancellationToken cancellationToken)
+    public Task TransformAsync(OpenApiSchema schema, OpenApiSchemaTransformerContext context,
+        CancellationToken cancellationToken)
     {
         MakePropertiesOptional(schema);
         return Task.CompletedTask;

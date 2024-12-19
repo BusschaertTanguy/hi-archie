@@ -20,20 +20,23 @@ public static class CommunityRoutes
             .WithTags("Communities");
 
         group
-            .MapGet("", async ([FromServices] IQueryHandler<GetCommunities.Request, GetCommunities.Response> handler, [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromQuery] string? name) =>
+            .MapGet("", async ([FromServices] IQueryHandler<GetCommunities.Request, GetCommunities.Response> handler,
+                [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromQuery] string? name) =>
             {
-                var result = await handler.HandleAsync(new(pageIndex, pageSize, name));
+                var result = await handler.HandleAsync(new GetCommunities.Request(pageIndex, pageSize, name));
                 return result.ToHttpResult();
             })
             .Produces<GetCommunities.Response>()
             .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
-            .MapPost("", async ([FromServices] ICommandHandler<AddCommunity.Command> handler, [FromBody] AddCommunity.Command command) =>
-            {
-                var result = await handler.HandleAsync(command);
-                return result.ToHttpResult();
-            })
+            .MapPost("",
+                async ([FromServices] ICommandHandler<AddCommunity.Command> handler,
+                    [FromBody] AddCommunity.Command command) =>
+                {
+                    var result = await handler.HandleAsync(command);
+                    return result.ToHttpResult();
+                })
             .Produces((int)HttpStatusCode.NoContent)
             .Produces((int)HttpStatusCode.Unauthorized)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
@@ -49,7 +52,8 @@ public static class CommunityRoutes
                 [FromBody] EditCommunity.Command command) =>
             {
                 var community = await communityRepository.GetById(command.Id);
-                var authorizationResult = await authorizationService.AuthorizeAsync(user, community, new UserIsOwnerRequirement());
+                var authorizationResult =
+                    await authorizationService.AuthorizeAsync(user, community, new UserIsOwnerRequirement());
 
                 if (!authorizationResult.Succeeded)
                 {

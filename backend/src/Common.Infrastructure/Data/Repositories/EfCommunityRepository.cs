@@ -12,6 +12,7 @@ internal sealed class EfCommunityRepository(AppDbContext dbContext) : ICommunity
 
     public async Task<Community> GetById(Guid id)
     {
-        return await dbContext.Set<Community>().FindAsync(id) ?? throw new InvalidOperationException("Community not found");
+        return await dbContext.Set<Community>().FindAsync(id) ??
+               throw new InvalidOperationException("Community not found");
     }
 }

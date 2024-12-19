@@ -10,12 +10,14 @@ internal static class RouteHandlerBuilderExtensions
     {
         return builder.AddEndpointFilter(async (context, next) =>
         {
-            if (context.Arguments.FirstOrDefault(a => a?.GetType().GetInterface(nameof(IRequiredUser)) != null) is not IRequiredUser command)
+            if (context.Arguments.FirstOrDefault(a => a?.GetType().GetInterface(nameof(IRequiredUser)) != null) is not
+                IRequiredUser command)
             {
                 throw new InvalidOperationException($"Command is not of type {nameof(IRequiredUser)}");
             }
 
-            var queryHandler = context.HttpContext.RequestServices.GetRequiredService<IQueryHandler<GetUserByExternalId.Request, GetUserByExternalId.Response?>>();
+            var queryHandler = context.HttpContext.RequestServices
+                .GetRequiredService<IQueryHandler<GetUserByExternalId.Request, GetUserByExternalId.Response?>>();
 
             var subject = context.HttpContext.GetSubjectClaimValue();
             if (subject == null)
@@ -23,7 +25,7 @@ internal static class RouteHandlerBuilderExtensions
                 return Results.Unauthorized();
             }
 
-            var userResult = await queryHandler.HandleAsync(new(subject));
+            var userResult = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
             var user = userResult.Data;
             if (user == null)
             {

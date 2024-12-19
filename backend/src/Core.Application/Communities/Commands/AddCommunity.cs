@@ -15,7 +15,10 @@ public static class AddCommunity
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(
+        IValidator<Command> validator,
+        IUnitOfWork unitOfWork,
+        ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {

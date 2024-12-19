@@ -16,7 +16,8 @@ public static class UserRoutes
             .WithTags("Users");
 
         group
-            .MapGet("me", async (HttpContext context, [FromServices] IQueryHandler<GetUserByExternalId.Request, GetUserByExternalId.Response?> queryHandler,
+            .MapGet("me", async (HttpContext context,
+                [FromServices] IQueryHandler<GetUserByExternalId.Request, GetUserByExternalId.Response?> queryHandler,
                 [FromServices] ICommandHandler<CreateUser.Command> commandHandler) =>
             {
                 var subject = context.GetSubjectClaimValue();
@@ -25,13 +26,13 @@ public static class UserRoutes
                     return Results.Unauthorized();
                 }
 
-                var result = await queryHandler.HandleAsync(new(subject));
+                var result = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
 
                 if (result.Data == null)
                 {
                     var command = new CreateUser.Command(subject);
                     await commandHandler.HandleAsync(command);
-                    result = await queryHandler.HandleAsync(new(subject));
+                    result = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
                 }
 
                 return result.ToHttpResult();

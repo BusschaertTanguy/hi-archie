@@ -9,7 +9,10 @@ public static class EditCommunity
 {
     public sealed record Command(Guid Id, string Name) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(
+        IValidator<Command> validator,
+        IUnitOfWork unitOfWork,
+        ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {

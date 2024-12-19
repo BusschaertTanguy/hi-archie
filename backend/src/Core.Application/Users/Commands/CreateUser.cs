@@ -10,7 +10,8 @@ public static class CreateUser
 {
     public sealed record Command(string ExternalId) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IUserRepository userRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IUserRepository userRepository)
+        : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
