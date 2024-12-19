@@ -9,4 +9,9 @@ internal sealed class EfCommunityRepository(AppDbContext dbContext) : ICommunity
     {
         return dbContext.Set<Community>().AddAsync(community).AsTask();
     }
+
+    public async Task<Community> GetById(Guid id)
+    {
+        return await dbContext.Set<Community>().FindAsync(id) ?? throw new InvalidOperationException("Community not found");
+    }
 }

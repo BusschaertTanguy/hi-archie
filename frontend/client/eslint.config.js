@@ -70,6 +70,7 @@ export default tseslint.config(
       "prettier/prettier": [
         "error",
         {
+          "endOfLine": "auto",
           plugins: ["prettier-plugin-tailwindcss"],
           tailwindFunctions: ["twJoin", "twMerge"],
         },

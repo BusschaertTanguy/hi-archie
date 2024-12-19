@@ -10,7 +10,7 @@ public static class GetCommunities
 {
     public sealed record Request(int PageIndex, int PageSize, string? Name) : IQuery<Response>;
 
-    public sealed record Dto(Guid Id, string Name);
+    public sealed record Dto(Guid Id, string Name, Guid OwnerId);
 
     public sealed record Response(List<Dto> Communities, long Total);
 
@@ -40,7 +40,7 @@ public static class GetCommunities
                 .OrderBy(c => c.Name)
                 .Skip(request.PageIndex * request.PageSize)
                 .Take(request.PageSize)
-                .Select(c => new Dto(c.Id, c.Name))
+                .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
                 .ToListAsync();
 
             return Result<Response>.Success(new(communities, total));

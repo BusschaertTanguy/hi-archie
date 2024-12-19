@@ -1,19 +1,13 @@
-﻿using System.Text.Json.Serialization;
-using Common.Application.Commands;
+﻿using Common.Application.Commands;
 using Common.Application.Models;
-using Core.Domain.Communities.Entities;
 using Core.Domain.Communities.Repositories;
 using FluentValidation;
 
 namespace Core.Application.Communities.Commands;
 
-public static class AddCommunity
+public static class EditCommunity
 {
-    public sealed record Command(Guid Id, string Name) : ICommand, IRequiredUser
-    {
-        [JsonIgnore]
-        public Guid UserId { get; init; }
-    }
+    public sealed record Command(Guid Id, string Name) : ICommand;
 
     internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
@@ -28,14 +22,10 @@ public static class AddCommunity
 
             var (id, name) = command;
 
-            var community = new Community
-            {
-                Id = id,
-                Name = name,
-                OwnerId = command.UserId
-            };
+            var community = await communityRepository.GetById(id);
 
-            await communityRepository.AddAsync(community);
+            community.Name = name;
+
             await unitOfWork.CommitAsync();
 
             return Result.Success();
@@ -52,9 +42,6 @@ public static class AddCommunity
             RuleFor(c => c.Name)
                 .NotEmpty()
                 .MaximumLength(50);
-
-            RuleFor(c => c.UserId)
-                .NotEmpty();
         }
     }
 }

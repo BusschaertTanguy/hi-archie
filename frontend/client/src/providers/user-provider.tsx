@@ -11,7 +11,7 @@ const UserProvider = ({ children }: PropsWithChildren) => {
   });
 
   const value: UserContextValue = {
-    id: data?.id,
+    userId: data?.id,
   };
 
   return <UserContext value={value}>{children}</UserContext>;

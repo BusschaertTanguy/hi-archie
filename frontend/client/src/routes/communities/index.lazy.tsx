@@ -1,11 +1,16 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
-import { useGetApiV1Communities } from "../../api/types";
+import {
+  CommunitiesQueriesGetCommunitiesDto,
+  useGetApiV1Communities,
+} from "../../api/types";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import Modal from "../../components/modal.tsx";
-import AddCommunity from "./-components/add-community.tsx";
 import useDisclosure from "../../hooks/use-disclosure.ts";
 import useDebounce from "../../hooks/use-debounce.ts";
 import Button from "../../components/button.tsx";
+import { useState } from "react";
+import CommunityForm from "./-components/community-form.tsx";
+import useUser from "../../hooks/use-user.ts";
 
 export const Route = createLazyFileRoute("/communities/")({
   component: Communities,
@@ -13,8 +18,13 @@ export const Route = createLazyFileRoute("/communities/")({
 
 function Communities() {
   const navigate = Route.useNavigate();
+  const { userId } = useUser();
+
   const { pageIndex, pageSize, name } = Route.useSearch();
   const debouncedName = useDebounce(name, 500);
+
+  const [selectedCommunity, setSelectedCommunity] =
+    useState<CommunitiesQueriesGetCommunitiesDto>();
 
   const {
     isOpen,
@@ -26,6 +36,11 @@ function Communities() {
     pageSize,
     name: debouncedName,
   });
+
+  const closeForm = () => {
+    close();
+    setSelectedCommunity(undefined);
+  };
 
   return (
     <>
@@ -50,7 +65,10 @@ function Communities() {
               onChange={async (e) => {
                 await navigate({
                   from: "/communities",
-                  search: (prev) => ({ ...prev, name: e.currentTarget.value }),
+                  search: (prev) => ({
+                    ...prev,
+                    name: e.currentTarget.value || undefined,
+                  }),
                 });
               }}
             />
@@ -79,20 +97,33 @@ function Communities() {
             {data?.communities.map((c) => (
               <div
                 key={c.id}
-                className="rounded p-4 outline outline-1 outline-black"
+                className="flex items-center justify-between rounded p-4 outline outline-1 outline-black"
               >
-                {c.name}
+                <div>{c.name}</div>
+                {userId === c.ownerId && (
+                  <Button
+                    color={"black"}
+                    variant={"outlined"}
+                    onClick={() => {
+                      setSelectedCommunity(c);
+                      open();
+                    }}
+                  >
+                    EDIT
+                  </Button>
+                )}
               </div>
             ))}
           </div>
         </div>
       </div>
       {isOpen && (
-        <Modal onClose={close}>
-          <AddCommunity
-            onCancel={close}
+        <Modal onClose={closeForm}>
+          <CommunityForm
+            community={selectedCommunity}
+            onCancel={closeForm}
             onSave={async () => {
-              close();
+              closeForm();
               await refetch();
             }}
           />

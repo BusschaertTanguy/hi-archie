@@ -20,7 +20,7 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
-export interface PostApiV1Communities500 {
+export type PutApiV1Communities500 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -31,9 +31,9 @@ export interface PostApiV1Communities500 {
   title?: string | null;
   /** @nullable */
   type?: string | null;
-}
+};
 
-export interface PostApiV1Communities400 {
+export type PutApiV1Communities400 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -44,9 +44,9 @@ export interface PostApiV1Communities400 {
   title?: string | null;
   /** @nullable */
   type?: string | null;
-}
+};
 
-export interface GetApiV1Communities500 {
+export type PostApiV1Communities500 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -57,9 +57,9 @@ export interface GetApiV1Communities500 {
   title?: string | null;
   /** @nullable */
   type?: string | null;
-}
+};
 
-export interface GetApiV1Communities400 {
+export type PostApiV1Communities400 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -70,15 +70,41 @@ export interface GetApiV1Communities400 {
   title?: string | null;
   /** @nullable */
   type?: string | null;
-}
+};
 
-export interface GetApiV1CommunitiesParams {
+export type GetApiV1Communities500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1Communities400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1CommunitiesParams = {
   pageIndex: number;
   pageSize: number;
   name?: string;
-}
+};
 
-export interface GetApiV1UsersMe500 {
+export type GetApiV1UsersMe500 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -89,7 +115,7 @@ export interface GetApiV1UsersMe500 {
   title?: string | null;
   /** @nullable */
   type?: string | null;
-}
+};
 
 export interface UsersQueriesGetUserByExternalIdResponse {
   id: string;
@@ -98,11 +124,17 @@ export interface UsersQueriesGetUserByExternalIdResponse {
 export interface CommunitiesQueriesGetCommunitiesDto {
   id: string;
   name: string;
+  ownerId: string;
 }
 
 export interface CommunitiesQueriesGetCommunitiesResponse {
   communities: CommunitiesQueriesGetCommunitiesDto[];
   total: number;
+}
+
+export interface CommunitiesCommandsEditCommunityCommand {
+  id: string;
+  name: string;
 }
 
 export interface CommunitiesCommandsAddCommunityCommand {
@@ -446,6 +478,83 @@ export const usePostApiV1Communities = <
   TContext
 > => {
   const mutationOptions = getPostApiV1CommunitiesMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const putApiV1Communities = (
+  communitiesCommandsEditCommunityCommand: BodyType<CommunitiesCommandsEditCommunityCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/communities`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: communitiesCommandsEditCommunityCommand,
+    },
+    options,
+  );
+};
+
+export const getPutApiV1CommunitiesMutationOptions = <
+  TError = ErrorType<PutApiV1Communities400 | void | PutApiV1Communities500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Communities>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsEditCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putApiV1Communities>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsEditCommunityCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putApiV1Communities>>,
+    { data: BodyType<CommunitiesCommandsEditCommunityCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return putApiV1Communities(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutApiV1CommunitiesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putApiV1Communities>>
+>;
+export type PutApiV1CommunitiesMutationBody =
+  BodyType<CommunitiesCommandsEditCommunityCommand>;
+export type PutApiV1CommunitiesMutationError = ErrorType<
+  PutApiV1Communities400 | void | PutApiV1Communities500
+>;
+
+export const usePutApiV1Communities = <
+  TError = ErrorType<PutApiV1Communities400 | void | PutApiV1Communities500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Communities>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsEditCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof putApiV1Communities>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsEditCommunityCommand> },
+  TContext
+> => {
+  const mutationOptions = getPutApiV1CommunitiesMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

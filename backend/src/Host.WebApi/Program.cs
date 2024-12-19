@@ -1,9 +1,11 @@
 using System.Net;
 using Common.Infrastructure.Data.Extensions;
 using Core.Application.Extensions;
+using Host.WebApi.Handlers;
 using Host.WebApi.Routes;
 using Host.WebApi.Transformers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -59,6 +61,8 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddTransient<IAuthorizationHandler, UserIsOwnerAuthorizationHandler>();
 
 var app = builder.Build();
 
