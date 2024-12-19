@@ -44,7 +44,7 @@ public static class GetCommunities
                 .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
                 .ToListAsync();
 
-            return Result<Response>.Success(new Response(communities, total));
+            return Result<Response>.Success(new(communities, total));
         }
     }
 

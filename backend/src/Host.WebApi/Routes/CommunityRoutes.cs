@@ -23,7 +23,7 @@ public static class CommunityRoutes
             .MapGet("", async ([FromServices] IQueryHandler<GetCommunities.Request, GetCommunities.Response> handler,
                 [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromQuery] string? name) =>
             {
-                var result = await handler.HandleAsync(new GetCommunities.Request(pageIndex, pageSize, name));
+                var result = await handler.HandleAsync(new(pageIndex, pageSize, name));
                 return result.ToHttpResult();
             })
             .Produces<GetCommunities.Response>()

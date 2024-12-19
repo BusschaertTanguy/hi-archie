@@ -25,7 +25,7 @@ internal static class RouteHandlerBuilderExtensions
                 return Results.Unauthorized();
             }
 
-            var userResult = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
+            var userResult = await queryHandler.HandleAsync(new(subject));
             var user = userResult.Data;
             if (user == null)
             {

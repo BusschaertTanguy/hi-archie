@@ -26,13 +26,13 @@ public static class UserRoutes
                     return Results.Unauthorized();
                 }
 
-                var result = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
+                var result = await queryHandler.HandleAsync(new(subject));
 
                 if (result.Data == null)
                 {
                     var command = new CreateUser.Command(subject);
                     await commandHandler.HandleAsync(command);
-                    result = await queryHandler.HandleAsync(new GetUserByExternalId.Request(subject));
+                    result = await queryHandler.HandleAsync(new(subject));
                 }
 
                 return result.ToHttpResult();
