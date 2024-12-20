@@ -2,6 +2,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 import Header from "../components/header.tsx";
 import SideNav from "../components/side-nav.tsx";
+import { z } from "zod";
 
 const TanStackRouterDevtools = import.meta.env.PROD
   ? () => null
@@ -11,15 +12,26 @@ const TanStackRouterDevtools = import.meta.env.PROD
       })),
     );
 
-const Root = () => {
+const rootSearchSchema = z.object({
+  search: z.string().optional(),
+});
+
+export const Route = createRootRoute({
+  component: Root,
+  validateSearch: (search) => rootSearchSchema.parse(search),
+});
+
+function Root() {
   return (
     <>
       <div className="flex h-full flex-col divide-y">
         <Header />
         <div className="flex flex-1 divide-x">
           <SideNav />
-          <main className="flex-1">
-            <Outlet />
+          <main className="flex flex-1 flex-col items-center">
+            <div className="-ml-32 w-1/2 p-6">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
@@ -28,8 +40,4 @@ const Root = () => {
       </Suspense>
     </>
   );
-};
-
-export const Route = createRootRoute({
-  component: Root,
-});
+}

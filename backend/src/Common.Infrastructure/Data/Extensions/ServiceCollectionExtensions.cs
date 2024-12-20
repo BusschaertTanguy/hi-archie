@@ -4,6 +4,7 @@ using Common.Infrastructure.Data.Commands;
 using Common.Infrastructure.Data.Queries;
 using Common.Infrastructure.Data.Repositories;
 using Core.Domain.Communities.Repositories;
+using Core.Domain.Posts.Repositories;
 using Core.Domain.Users.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IUnitOfWork, EfUnitOfWork>()
             .AddTransient<IQueryProcessor, EfQueryProcessor>()
             .AddTransient<ICommunityRepository, EfCommunityRepository>()
+            .AddTransient<IPostRepository, EfPostRepository>()
             .AddTransient<IUserRepository, EfUserRepository>();
     }
 }

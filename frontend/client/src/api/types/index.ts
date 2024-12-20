@@ -20,6 +20,32 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
+export type GetApiV1CommunitiesId500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1CommunitiesId400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
 export type PutApiV1Communities500 = {
   /** @nullable */
   detail?: string | null;
@@ -119,6 +145,12 @@ export type GetApiV1UsersMe500 = {
 
 export interface UsersQueriesGetUserByExternalIdResponse {
   id: string;
+}
+
+export interface CommunitiesQueriesGetCommunityResponse {
+  id: string;
+  name: string;
+  ownerId: string;
 }
 
 export interface CommunitiesQueriesGetCommunitiesDto {
@@ -558,3 +590,156 @@ export const usePutApiV1Communities = <
 
   return useMutation(mutationOptions);
 };
+
+export const getApiV1CommunitiesId = (
+  id: string,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<CommunitiesQueriesGetCommunityResponse>(
+    { url: `/api/v1/communities/${id}`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetApiV1CommunitiesIdQueryKey = (id: string) => {
+  return [`/api/v1/communities/${id}`] as const;
+};
+
+export const getGetApiV1CommunitiesIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+  TError = ErrorType<GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1CommunitiesIdQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1CommunitiesId>>
+  > = ({ signal }) => getApiV1CommunitiesId(id, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetApiV1CommunitiesIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1CommunitiesId>>
+>;
+export type GetApiV1CommunitiesIdQueryError = ErrorType<
+  GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500
+>;
+
+export function useGetApiV1CommunitiesId<
+  TData = Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+  TError = ErrorType<GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetApiV1CommunitiesId<
+  TData = Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+  TError = ErrorType<GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetApiV1CommunitiesId<
+  TData = Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+  TError = ErrorType<GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetApiV1CommunitiesId<
+  TData = Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+  TError = ErrorType<GetApiV1CommunitiesId400 | GetApiV1CommunitiesId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1CommunitiesId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetApiV1CommunitiesIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

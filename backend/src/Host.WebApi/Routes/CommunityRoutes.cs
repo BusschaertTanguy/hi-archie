@@ -30,6 +30,15 @@ public static class CommunityRoutes
             .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
+            .MapGet("{id:guid}", async ([FromServices] IQueryHandler<GetCommunity.Request, GetCommunity.Response> handler, [FromRoute] Guid id) =>
+            {
+                var result = await handler.HandleAsync(new(id));
+                return result.ToHttpResult();
+            })
+            .Produces<GetCommunity.Response>()
+            .ProducesProblem((int)HttpStatusCode.BadRequest);
+
+        group
             .MapPost("",
                 async ([FromServices] ICommandHandler<AddCommunity.Command> handler,
                     [FromBody] AddCommunity.Command command) =>

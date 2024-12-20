@@ -1,5 +1,6 @@
 ﻿using Core.Domain.Communities.Entities;
 using Core.Domain.Communities.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Common.Infrastructure.Data.Repositories;
 

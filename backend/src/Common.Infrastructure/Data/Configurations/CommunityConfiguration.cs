@@ -1,4 +1,5 @@
 ﻿using Core.Domain.Communities.Entities;
+using Core.Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,8 +18,9 @@ internal sealed class CommunityConfiguration : IEntityTypeConfiguration<Communit
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasOne(c => c.Owner)
+        builder.HasOne<User>()
             .WithMany()
-            .HasForeignKey(c => c.OwnerId);
+            .HasForeignKey(c => c.OwnerId)
+            .IsRequired();
     }
 }
