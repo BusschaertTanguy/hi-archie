@@ -20,6 +20,90 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
+export type GetApiV1PostsId500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1PostsId400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1Posts500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1Posts400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1Posts500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1Posts400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1PostsParams = {
+  communityId: string;
+  pageIndex: number;
+  pageSize: number;
+};
+
 export type GetApiV1CommunitiesId500 = {
   /** @nullable */
   detail?: string | null;
@@ -145,6 +229,32 @@ export type GetApiV1UsersMe500 = {
 
 export interface UsersQueriesGetUserByExternalIdResponse {
   id: string;
+}
+
+export interface PostsQueriesGetPostsDto {
+  id: string;
+  publishDate: string;
+  title: string;
+}
+
+export interface PostsQueriesGetPostsResponse {
+  posts: PostsQueriesGetPostsDto[];
+  total: number;
+}
+
+export interface PostsQueriesGetPostResponse {
+  content: string;
+  id: string;
+  ownerId: string;
+  publishDate: string;
+  title: string;
+}
+
+export interface PostsCommandsAddPostCommand {
+  communityId: string;
+  content: string;
+  id: string;
+  title: string;
 }
 
 export interface CommunitiesQueriesGetCommunityResponse {
@@ -734,6 +844,363 @@ export function useGetApiV1CommunitiesId<
   },
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
   const queryOptions = getGetApiV1CommunitiesIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getApiV1Posts = (
+  params: GetApiV1PostsParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<PostsQueriesGetPostsResponse>(
+    { url: `/api/v1/posts`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetApiV1PostsQueryKey = (params: GetApiV1PostsParams) => {
+  return [`/api/v1/posts`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiV1PostsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1Posts>>,
+  TError = ErrorType<GetApiV1Posts400 | GetApiV1Posts500>,
+>(
+  params: GetApiV1PostsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getApiV1Posts>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetApiV1PostsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Posts>>> = ({
+    signal,
+  }) => getApiV1Posts(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1Posts>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetApiV1PostsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1Posts>>
+>;
+export type GetApiV1PostsQueryError = ErrorType<
+  GetApiV1Posts400 | GetApiV1Posts500
+>;
+
+export function useGetApiV1Posts<
+  TData = Awaited<ReturnType<typeof getApiV1Posts>>,
+  TError = ErrorType<GetApiV1Posts400 | GetApiV1Posts500>,
+>(
+  params: GetApiV1PostsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getApiV1Posts>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Posts>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetApiV1Posts<
+  TData = Awaited<ReturnType<typeof getApiV1Posts>>,
+  TError = ErrorType<GetApiV1Posts400 | GetApiV1Posts500>,
+>(
+  params: GetApiV1PostsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getApiV1Posts>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Posts>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetApiV1Posts<
+  TData = Awaited<ReturnType<typeof getApiV1Posts>>,
+  TError = ErrorType<GetApiV1Posts400 | GetApiV1Posts500>,
+>(
+  params: GetApiV1PostsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getApiV1Posts>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetApiV1Posts<
+  TData = Awaited<ReturnType<typeof getApiV1Posts>>,
+  TError = ErrorType<GetApiV1Posts400 | GetApiV1Posts500>,
+>(
+  params: GetApiV1PostsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getApiV1Posts>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetApiV1PostsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postApiV1Posts = (
+  postsCommandsAddPostCommand: BodyType<PostsCommandsAddPostCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/posts`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: postsCommandsAddPostCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1PostsMutationOptions = <
+  TError = ErrorType<PostApiV1Posts400 | void | PostApiV1Posts500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1Posts>>,
+    TError,
+    { data: BodyType<PostsCommandsAddPostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1Posts>>,
+  TError,
+  { data: BodyType<PostsCommandsAddPostCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1Posts>>,
+    { data: BodyType<PostsCommandsAddPostCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1Posts(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1PostsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1Posts>>
+>;
+export type PostApiV1PostsMutationBody = BodyType<PostsCommandsAddPostCommand>;
+export type PostApiV1PostsMutationError = ErrorType<
+  PostApiV1Posts400 | void | PostApiV1Posts500
+>;
+
+export const usePostApiV1Posts = <
+  TError = ErrorType<PostApiV1Posts400 | void | PostApiV1Posts500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1Posts>>,
+    TError,
+    { data: BodyType<PostsCommandsAddPostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1Posts>>,
+  TError,
+  { data: BodyType<PostsCommandsAddPostCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1PostsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const getApiV1PostsId = (
+  id: string,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<PostsQueriesGetPostResponse>(
+    { url: `/api/v1/posts/${id}`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetApiV1PostsIdQueryKey = (id: string) => {
+  return [`/api/v1/posts/${id}`] as const;
+};
+
+export const getGetApiV1PostsIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1PostsId>>,
+  TError = ErrorType<GetApiV1PostsId400 | GetApiV1PostsId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1PostsId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetApiV1PostsIdQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PostsId>>> = ({
+    signal,
+  }) => getApiV1PostsId(id, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1PostsId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetApiV1PostsIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1PostsId>>
+>;
+export type GetApiV1PostsIdQueryError = ErrorType<
+  GetApiV1PostsId400 | GetApiV1PostsId500
+>;
+
+export function useGetApiV1PostsId<
+  TData = Awaited<ReturnType<typeof getApiV1PostsId>>,
+  TError = ErrorType<GetApiV1PostsId400 | GetApiV1PostsId500>,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1PostsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PostsId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetApiV1PostsId<
+  TData = Awaited<ReturnType<typeof getApiV1PostsId>>,
+  TError = ErrorType<GetApiV1PostsId400 | GetApiV1PostsId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1PostsId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PostsId>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetApiV1PostsId<
+  TData = Awaited<ReturnType<typeof getApiV1PostsId>>,
+  TError = ErrorType<GetApiV1PostsId400 | GetApiV1PostsId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1PostsId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetApiV1PostsId<
+  TData = Awaited<ReturnType<typeof getApiV1PostsId>>,
+  TError = ErrorType<GetApiV1PostsId400 | GetApiV1PostsId500>,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1PostsId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetApiV1PostsIdQueryOptions(id, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData>;

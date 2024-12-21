@@ -1,18 +1,18 @@
-﻿using Common.Application.Models;
+using Common.Application.Models;
 using Common.Application.Queries;
-using Core.Domain.Communities.Entities;
+using Core.Domain.Posts.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core.Application.Communities.Queries;
+namespace Core.Application.Posts.Queries;
 
-public static class GetCommunities
+public static class GetPosts
 {
-    public sealed record Request(int PageIndex, int PageSize, string? Name) : IQuery<Response>;
+    public sealed record Request(Guid CommunityId, int PageIndex, int PageSize) : IQuery<Response>;
 
-    public sealed record Dto(Guid Id, string Name, Guid OwnerId);
+    public sealed record Dto(Guid Id, string Title, DateTime PublishDate);
 
-    public sealed record Response(List<Dto> Communities, long Total);
+    public sealed record Response(List<Dto> Posts, long Total);
 
     internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor)
         : IQueryHandler<Request, Response>
@@ -26,25 +26,21 @@ public static class GetCommunities
                 return Result<Response>.Failure("validation-failed");
             }
 
-            var communitiesQuery = queryProcessor
-                .Query<Community>();
+            var postsQuery = queryProcessor
+                .Query<Post>()
+                .Where(p => p.CommunityId == request.CommunityId);
 
-            if (!string.IsNullOrWhiteSpace(request.Name))
-            {
-                communitiesQuery = communitiesQuery.Where(c => c.Name.Contains(request.Name));
-            }
-
-            var total = await communitiesQuery
+            var total = await postsQuery
                 .CountAsync();
 
-            var communities = await communitiesQuery
-                .OrderBy(c => c.Name)
+            var posts = await postsQuery
+                .OrderByDescending(p => p.PublishDate)
                 .Skip(request.PageIndex * request.PageSize)
                 .Take(request.PageSize)
-                .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
+                .Select(p => new Dto(p.Id, p.Title, p.PublishDate))
                 .ToListAsync();
 
-            return Result<Response>.Success(new(communities, total));
+            return Result<Response>.Success(new(posts, total));
         }
     }
 
@@ -52,6 +48,9 @@ public static class GetCommunities
     {
         public Validator()
         {
+            RuleFor(r => r.CommunityId)
+                .NotEmpty();
+
             RuleFor(r => r.PageIndex)
                 .GreaterThanOrEqualTo(0);
 

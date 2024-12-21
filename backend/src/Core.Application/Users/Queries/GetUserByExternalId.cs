@@ -13,10 +13,10 @@ public static class GetUserByExternalId
 
     internal sealed class Handler(IQueryProcessor queryProcessor) : IQueryHandler<Request, Response?>
     {
-        public async Task<Result<Response?>> HandleAsync(Request query)
+        public async Task<Result<Response?>> HandleAsync(Request request)
         {
             var user = await queryProcessor.Query<User>()
-                .Where(u => u.ExternalId == query.ExternalId)
+                .Where(u => u.ExternalId == request.ExternalId)
                 .Select(u => new Response(u.Id))
                 .FirstOrDefaultAsync();
 

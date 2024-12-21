@@ -66,6 +66,7 @@ function Communities() {
                   await navigate({
                     to: "/communities/$communityId",
                     params: { communityId: c.id },
+                    search: { pageIndex: 0, pageSize: 25 },
                   });
                 }}
               >

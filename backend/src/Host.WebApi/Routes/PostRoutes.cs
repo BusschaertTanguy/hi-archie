@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using Common.Application.Commands;
+using Common.Application.Queries;
 using Core.Application.Posts.Commands;
+using Core.Application.Posts.Queries;
 using Host.WebApi.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +14,26 @@ public static class PostRoutes
     {
         var group = api.MapGroup("posts")
             .WithTags("Posts");
+
+        group
+            .MapGet("", async ([FromServices] IQueryHandler<GetPosts.Request, GetPosts.Response> handler,
+                [FromQuery] Guid communityId, [FromQuery] int pageIndex, [FromQuery] int pageSize) =>
+            {
+                var result = await handler.HandleAsync(new(communityId, pageIndex, pageSize));
+                return result.ToHttpResult();
+            })
+            .Produces<GetPosts.Response>()
+            .ProducesProblem((int)HttpStatusCode.BadRequest);
+
+        group
+            .MapGet("{id:guid}", async ([FromServices] IQueryHandler<GetPost.Request, GetPost.Response> handler,
+                [FromRoute] Guid id) =>
+            {
+                var result = await handler.HandleAsync(new(id));
+                return result.ToHttpResult();
+            })
+            .Produces<GetPost.Response>()
+            .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
             .MapPost("",

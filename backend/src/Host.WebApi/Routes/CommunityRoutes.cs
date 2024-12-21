@@ -20,8 +20,11 @@ public static class CommunityRoutes
             .WithTags("Communities");
 
         group
-            .MapGet("", async ([FromServices] IQueryHandler<GetCommunities.Request, GetCommunities.Response> handler,
-                [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromQuery] string? name) =>
+            .MapGet("", async (
+                [FromServices] IQueryHandler<GetCommunities.Request, GetCommunities.Response> handler,
+                [FromQuery] int pageIndex,
+                [FromQuery] int pageSize,
+                [FromQuery] string? name) =>
             {
                 var result = await handler.HandleAsync(new(pageIndex, pageSize, name));
                 return result.ToHttpResult();
@@ -30,17 +33,21 @@ public static class CommunityRoutes
             .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
-            .MapGet("{id:guid}", async ([FromServices] IQueryHandler<GetCommunity.Request, GetCommunity.Response> handler, [FromRoute] Guid id) =>
-            {
-                var result = await handler.HandleAsync(new(id));
-                return result.ToHttpResult();
-            })
+            .MapGet("{id:guid}",
+                async (
+                    [FromServices] IQueryHandler<GetCommunity.Request, GetCommunity.Response> handler,
+                    [FromRoute] Guid id) =>
+                {
+                    var result = await handler.HandleAsync(new(id));
+                    return result.ToHttpResult();
+                })
             .Produces<GetCommunity.Response>()
             .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
             .MapPost("",
-                async ([FromServices] ICommandHandler<AddCommunity.Command> handler,
+                async (
+                    [FromServices] ICommandHandler<AddCommunity.Command> handler,
                     [FromBody] AddCommunity.Command command) =>
                 {
                     var result = await handler.HandleAsync(command);
