@@ -17,9 +17,9 @@ public static class PostRoutes
 
         group
             .MapGet("", async ([FromServices] IQueryHandler<GetPosts.Request, GetPosts.Response> handler,
-                [FromQuery] Guid communityId, [FromQuery] int pageIndex, [FromQuery] int pageSize) =>
+                [FromQuery] Guid communityId, [FromQuery] int pageIndex, [FromQuery] int pageSize, [FromQuery] string? title) =>
             {
-                var result = await handler.HandleAsync(new(communityId, pageIndex, pageSize));
+                var result = await handler.HandleAsync(new(communityId, pageIndex, pageSize, title));
                 return result.ToHttpResult();
             })
             .Produces<GetPosts.Response>()

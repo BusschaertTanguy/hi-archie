@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IQueryProcessor, EfQueryProcessor>()
             .AddTransient<ICommunityRepository, EfCommunityRepository>()
             .AddTransient<IPostRepository, EfPostRepository>()
+            .AddTransient<ISubscriptionRepository, EfSubscriptionRepository>()
             .AddTransient<IUserRepository, EfUserRepository>();
     }
 }

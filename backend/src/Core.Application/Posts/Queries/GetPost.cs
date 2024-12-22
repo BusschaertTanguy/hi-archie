@@ -18,7 +18,6 @@ public static class GetPost
         public async Task<Result<Response>> HandleAsync(Request request)
         {
             var validationResult = await validator.ValidateAsync(request);
-
             if (!validationResult.IsValid)
             {
                 return Result<Response>.Failure("validation-failed");

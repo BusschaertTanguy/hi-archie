@@ -20,18 +20,19 @@ public static class GetCommunities
         public async Task<Result<Response>> HandleAsync(Request request)
         {
             var validationResult = await validator.ValidateAsync(request);
-
             if (!validationResult.IsValid)
             {
                 return Result<Response>.Failure("validation-failed");
             }
 
+            var (pageIndex, pageSize, name) = request;
+
             var communitiesQuery = queryProcessor
                 .Query<Community>();
 
-            if (!string.IsNullOrWhiteSpace(request.Name))
+            if (!string.IsNullOrWhiteSpace(name))
             {
-                communitiesQuery = communitiesQuery.Where(c => c.Name.Contains(request.Name));
+                communitiesQuery = communitiesQuery.Where(c => c.Name.Contains(name));
             }
 
             var total = await communitiesQuery
@@ -39,8 +40,8 @@ public static class GetCommunities
 
             var communities = await communitiesQuery
                 .OrderBy(c => c.Name)
-                .Skip(request.PageIndex * request.PageSize)
-                .Take(request.PageSize)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
                 .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
                 .ToListAsync();
 

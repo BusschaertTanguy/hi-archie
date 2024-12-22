@@ -60,6 +60,36 @@ public static class CommunityRoutes
             .RequireUser();
 
         group
+            .MapPost("join",
+                async (
+                    [FromServices] ICommandHandler<JoinCommunity.Command> handler,
+                    [FromBody] JoinCommunity.Command command) =>
+                {
+                    var result = await handler.HandleAsync(command);
+                    return result.ToHttpResult();
+                })
+            .Produces((int)HttpStatusCode.NoContent)
+            .Produces((int)HttpStatusCode.Unauthorized)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization()
+            .RequireUser();
+
+        group
+            .MapPost("leave",
+                async (
+                    [FromServices] ICommandHandler<LeaveCommunity.Command> handler,
+                    [FromBody] LeaveCommunity.Command command) =>
+                {
+                    var result = await handler.HandleAsync(command);
+                    return result.ToHttpResult();
+                })
+            .Produces((int)HttpStatusCode.NoContent)
+            .Produces((int)HttpStatusCode.Unauthorized)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization()
+            .RequireUser();
+
+        group
             .MapPut("", async (
                 ClaimsPrincipal user,
                 [FromServices] ICommunityRepository communityRepository,

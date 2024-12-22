@@ -1,24 +1,20 @@
 ﻿using System.Text.Json.Serialization;
 using Common.Application.Commands;
 using Common.Application.Models;
-using Core.Domain.Communities.Entities;
 using Core.Domain.Communities.Repositories;
 using FluentValidation;
 
 namespace Core.Application.Communities.Commands;
 
-public static class AddCommunity
+public static class LeaveCommunity
 {
-    public sealed record Command(Guid Id, string Name) : ICommand, IRequiredUser
+    public sealed record Command(Guid CommunityId) : ICommand, IRequiredUser
     {
         [JsonIgnore]
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(
-        IValidator<Command> validator,
-        IUnitOfWork unitOfWork,
-        ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -28,16 +24,8 @@ public static class AddCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var (id, name) = command;
-
-            var community = new Community
-            {
-                Id = id,
-                Name = name,
-                OwnerId = command.UserId
-            };
-
-            await communityRepository.AddAsync(community);
+            var subscription = await subscriptionRepository.GetByIdAsync(command.CommunityId, command.UserId);
+            await subscriptionRepository.DeleteAsync(subscription);
             await unitOfWork.CommitAsync();
 
             return Result.Success();
@@ -48,14 +36,10 @@ public static class AddCommunity
     {
         public Validator()
         {
-            RuleFor(c => c.Id)
+            RuleFor(x => x.CommunityId)
                 .NotEmpty();
 
-            RuleFor(c => c.Name)
-                .NotEmpty()
-                .MaximumLength(50);
-
-            RuleFor(c => c.UserId)
+            RuleFor(x => x.UserId)
                 .NotEmpty();
         }
     }

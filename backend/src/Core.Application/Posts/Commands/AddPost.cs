@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Common.Application.Commands;
 using Common.Application.Models;
+using Core.Domain.Communities.Repositories;
 using Core.Domain.Posts.Entities;
 using Core.Domain.Posts.Repositories;
 using FluentValidation;
@@ -15,7 +16,7 @@ public static class AddPost
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -23,6 +24,12 @@ public static class AddPost
             if (!validationResult.IsValid)
             {
                 return Result.Failure("validation-failed");
+            }
+
+            var exist = await subscriptionRepository.ExistsAsync(command.CommunityId, command.UserId);
+            if (!exist)
+            {
+                return Result.Failure("not-subscribed");
             }
 
             var (id, communityId, title, content) = command;

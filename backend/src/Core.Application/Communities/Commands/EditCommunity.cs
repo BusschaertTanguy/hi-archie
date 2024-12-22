@@ -17,7 +17,6 @@ public static class EditCommunity
         public async Task<Result> HandleAsync(Command command)
         {
             var validationResult = await validator.ValidateAsync(command);
-
             if (!validationResult.IsValid)
             {
                 return Result.Failure("validation-failed");

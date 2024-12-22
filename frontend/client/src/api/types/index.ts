@@ -102,6 +102,59 @@ export type GetApiV1PostsParams = {
   communityId: string;
   pageIndex: number;
   pageSize: number;
+  title?: string;
+};
+
+export type PostApiV1CommunitiesLeave500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1CommunitiesLeave400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1CommunitiesJoin500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1CommunitiesJoin400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
 };
 
 export type GetApiV1CommunitiesId500 = {
@@ -229,6 +282,7 @@ export type GetApiV1UsersMe500 = {
 
 export interface UsersQueriesGetUserByExternalIdResponse {
   id: string;
+  joinedCommunities: string[];
 }
 
 export interface PostsQueriesGetPostsDto {
@@ -272,6 +326,14 @@ export interface CommunitiesQueriesGetCommunitiesDto {
 export interface CommunitiesQueriesGetCommunitiesResponse {
   communities: CommunitiesQueriesGetCommunitiesDto[];
   total: number;
+}
+
+export interface CommunitiesCommandsLeaveCommunityCommand {
+  communityId: string;
+}
+
+export interface CommunitiesCommandsJoinCommunityCommand {
+  communityId: string;
 }
 
 export interface CommunitiesCommandsEditCommunityCommand {
@@ -853,6 +915,172 @@ export function useGetApiV1CommunitiesId<
 
   return query;
 }
+
+export const postApiV1CommunitiesJoin = (
+  communitiesCommandsJoinCommunityCommand: BodyType<CommunitiesCommandsJoinCommunityCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/communities/join`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: communitiesCommandsJoinCommunityCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1CommunitiesJoinMutationOptions = <
+  TError = ErrorType<
+    PostApiV1CommunitiesJoin400 | void | PostApiV1CommunitiesJoin500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsJoinCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsJoinCommunityCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>,
+    { data: BodyType<CommunitiesCommandsJoinCommunityCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1CommunitiesJoin(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1CommunitiesJoinMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>
+>;
+export type PostApiV1CommunitiesJoinMutationBody =
+  BodyType<CommunitiesCommandsJoinCommunityCommand>;
+export type PostApiV1CommunitiesJoinMutationError = ErrorType<
+  PostApiV1CommunitiesJoin400 | void | PostApiV1CommunitiesJoin500
+>;
+
+export const usePostApiV1CommunitiesJoin = <
+  TError = ErrorType<
+    PostApiV1CommunitiesJoin400 | void | PostApiV1CommunitiesJoin500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsJoinCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1CommunitiesJoin>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsJoinCommunityCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1CommunitiesJoinMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postApiV1CommunitiesLeave = (
+  communitiesCommandsLeaveCommunityCommand: BodyType<CommunitiesCommandsLeaveCommunityCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/communities/leave`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: communitiesCommandsLeaveCommunityCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1CommunitiesLeaveMutationOptions = <
+  TError = ErrorType<
+    PostApiV1CommunitiesLeave400 | void | PostApiV1CommunitiesLeave500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsLeaveCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsLeaveCommunityCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>,
+    { data: BodyType<CommunitiesCommandsLeaveCommunityCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1CommunitiesLeave(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1CommunitiesLeaveMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>
+>;
+export type PostApiV1CommunitiesLeaveMutationBody =
+  BodyType<CommunitiesCommandsLeaveCommunityCommand>;
+export type PostApiV1CommunitiesLeaveMutationError = ErrorType<
+  PostApiV1CommunitiesLeave400 | void | PostApiV1CommunitiesLeave500
+>;
+
+export const usePostApiV1CommunitiesLeave = <
+  TError = ErrorType<
+    PostApiV1CommunitiesLeave400 | void | PostApiV1CommunitiesLeave500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>,
+    TError,
+    { data: BodyType<CommunitiesCommandsLeaveCommunityCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1CommunitiesLeave>>,
+  TError,
+  { data: BodyType<CommunitiesCommandsLeaveCommunityCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1CommunitiesLeaveMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
 
 export const getApiV1Posts = (
   params: GetApiV1PostsParams,

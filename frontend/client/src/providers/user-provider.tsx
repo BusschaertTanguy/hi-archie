@@ -6,12 +6,14 @@ import { UserContext, UserContextValue } from "../contexts/user-context.ts";
 const UserProvider = ({ children }: PropsWithChildren) => {
   const { isAuthenticated, user } = useAuth0();
 
-  const { data } = useGetApiV1UsersMe({
+  const { data, refetch } = useGetApiV1UsersMe({
     query: { enabled: isAuthenticated && !!user },
   });
 
   const value: UserContextValue = {
     userId: data?.id,
+    joinedCommunities: data?.joinedCommunities,
+    refresh: refetch,
   };
 
   return <UserContext value={value}>{children}</UserContext>;

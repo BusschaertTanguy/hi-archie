@@ -1,7 +1,11 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
-import { useGetApiV1CommunitiesId, useGetApiV1Posts } from "../../../api/types";
+import {
+  useGetApiV1CommunitiesId,
+  useGetApiV1Posts,
+  usePostApiV1CommunitiesJoin,
+  usePostApiV1CommunitiesLeave,
+} from "../../../api/types";
 import Button from "../../../components/button.tsx";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import useUser from "../../../hooks/use-user.ts";
 
 export const Route = createLazyFileRoute("/communities/$communityId/")({
@@ -9,33 +13,85 @@ export const Route = createLazyFileRoute("/communities/$communityId/")({
 });
 
 function Community() {
-  const { userId } = useUser();
+  const { userId, joinedCommunities, refresh } = useUser();
 
   const navigate = Route.useNavigate();
   const { communityId } = Route.useParams();
-  const { pageIndex, pageSize } = Route.useSearch();
+  const { pageIndex, pageSize, search } = Route.useSearch();
 
   const communityQuery = useGetApiV1CommunitiesId(communityId);
-  const postsQuery = useGetApiV1Posts({ pageIndex, pageSize, communityId });
+  const postsQuery = useGetApiV1Posts({
+    pageIndex,
+    pageSize,
+    communityId,
+    title: search,
+  });
+
+  const leaveMutation = usePostApiV1CommunitiesLeave({
+    mutation: {
+      onSuccess: () => {
+        refresh();
+      },
+    },
+  });
+
+  const joinMutation = usePostApiV1CommunitiesJoin({
+    mutation: {
+      onSuccess: () => {
+        refresh();
+      },
+    },
+  });
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div className="text-2xl">{communityQuery.data?.name}</div>
-        {userId && (
+        {userId && joinedCommunities?.includes(communityId) && (
+          <div className="flex gap-2">
+            <Button
+              color="black"
+              variant="filled"
+              className="flex items-center justify-center gap-0.5"
+              onClick={() =>
+                navigate({
+                  to: "/communities/$communityId/add-post",
+                  params: { communityId },
+                })
+              }
+            >
+              POST
+            </Button>
+            <Button
+              color="black"
+              variant="outlined"
+              className="flex items-center justify-center gap-0.5"
+              onClick={() =>
+                leaveMutation.mutateAsync({
+                  data: {
+                    communityId,
+                  },
+                })
+              }
+            >
+              LEAVE
+            </Button>
+          </div>
+        )}
+        {userId && !joinedCommunities?.includes(communityId) && (
           <Button
             color="black"
             variant="filled"
             className="flex items-center justify-center gap-0.5"
             onClick={() =>
-              navigate({
-                to: "/communities/$communityId/add-post",
-                params: { communityId },
+              joinMutation.mutateAsync({
+                data: {
+                  communityId,
+                },
               })
             }
           >
-            <PlusIcon className="size-6" />
-            POST
+            JOIN
           </Button>
         )}
       </div>

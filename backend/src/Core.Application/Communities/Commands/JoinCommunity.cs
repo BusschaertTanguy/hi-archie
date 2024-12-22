@@ -7,18 +7,15 @@ using FluentValidation;
 
 namespace Core.Application.Communities.Commands;
 
-public static class AddCommunity
+public static class JoinCommunity
 {
-    public sealed record Command(Guid Id, string Name) : ICommand, IRequiredUser
+    public sealed record Command(Guid CommunityId) : ICommand, IRequiredUser
     {
         [JsonIgnore]
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(
-        IValidator<Command> validator,
-        IUnitOfWork unitOfWork,
-        ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -28,16 +25,19 @@ public static class AddCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var (id, name) = command;
-
-            var community = new Community
+            var exists = await subscriptionRepository.ExistsAsync(command.CommunityId, command.UserId);
+            if (exists)
             {
-                Id = id,
-                Name = name,
-                OwnerId = command.UserId
+                return Result.Success();
+            }
+
+            var subscription = new Subscription
+            {
+                CommunityId = command.CommunityId,
+                UserId = command.UserId
             };
 
-            await communityRepository.AddAsync(community);
+            await subscriptionRepository.AddAsync(subscription);
             await unitOfWork.CommitAsync();
 
             return Result.Success();
@@ -48,14 +48,10 @@ public static class AddCommunity
     {
         public Validator()
         {
-            RuleFor(c => c.Id)
+            RuleFor(x => x.CommunityId)
                 .NotEmpty();
 
-            RuleFor(c => c.Name)
-                .NotEmpty()
-                .MaximumLength(50);
-
-            RuleFor(c => c.UserId)
+            RuleFor(x => x.UserId)
                 .NotEmpty();
         }
     }
