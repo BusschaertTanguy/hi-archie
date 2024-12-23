@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ClassAttributes } from "react";
+import { ButtonHTMLAttributes, ClassAttributes, memo } from "react";
 import { twMerge } from "tailwind-merge";
 
 type ButtonVariant = "filled" | "outlined";
@@ -63,4 +63,4 @@ const Button = ({ children, color, variant, ...props }: ButtonProps) => {
   );
 };
 
-export default Button;
+export default memo(Button);

@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { memo, PropsWithChildren, useEffect } from "react";
 import addTokenInterceptor from "../api/interceptors/add-token-interceptor.ts";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -12,4 +12,4 @@ const AxiosProvider = ({ children }: PropsWithChildren) => {
   return <>{children}</>;
 };
 
-export default AxiosProvider;
+export default memo(AxiosProvider);

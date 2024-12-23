@@ -7,7 +7,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import Modal from "../../components/modal.tsx";
 import useDisclosure from "../../hooks/use-disclosure.ts";
 import Button from "../../components/button.tsx";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import CommunityForm from "./-components/community-form.tsx";
 import useUser from "../../hooks/use-user.ts";
 
@@ -34,10 +34,10 @@ function Communities() {
     name: search,
   });
 
-  const closeForm = () => {
+  const closeForm = useCallback(() => {
     close();
     setSelectedCommunity(undefined);
-  };
+  }, [close]);
 
   return (
     <>

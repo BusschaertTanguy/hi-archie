@@ -1,4 +1,4 @@
-import { ClassAttributes, TextareaHTMLAttributes } from "react";
+import { ClassAttributes, memo, TextareaHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 import { FieldError } from "react-hook-form";
 
@@ -24,4 +24,4 @@ const FormTextAreaInput = ({ label, error, ...props }: FormInputProps) => {
   );
 };
 
-export default FormTextAreaInput;
+export default memo(FormTextAreaInput);

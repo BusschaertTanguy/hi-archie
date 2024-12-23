@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { twMerge } from "tailwind-merge";
 import { BookOpenIcon } from "@heroicons/react/24/solid";
+import { memo } from "react";
 
 const SideNav = () => {
   const linkClassName = twMerge("flex items-center gap-2 rounded px-3 py-1");
@@ -26,4 +27,4 @@ const SideNav = () => {
   );
 };
 
-export default SideNav;
+export default memo(SideNav);

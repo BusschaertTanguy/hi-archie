@@ -10,7 +10,6 @@ import tailwind from "eslint-plugin-tailwindcss";
 import pluginRouter from "@tanstack/eslint-plugin-router";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import pluginReactHookForm from "eslint-plugin-react-hook-form";
-import reactCompiler from "eslint-plugin-react-compiler";
 
 export default tseslint.config(
   {
@@ -53,10 +52,8 @@ export default tseslint.config(
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
       "react-hook-form": fixupPluginRules(pluginReactHookForm),
-      "react-compiler": reactCompiler,
     },
     rules: {
-      "react-compiler/react-compiler": "error",
       ...reactPlugin.configs.recommended.rules,
       ...reactPlugin.configs["jsx-runtime"].rules,
       ...reactHooks.configs.recommended.rules,

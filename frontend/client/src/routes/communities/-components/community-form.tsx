@@ -8,6 +8,7 @@ import {
 } from "../../../api/types";
 import Button from "../../../components/button.tsx";
 import FormTextInput from "../../../components/form-text-input.tsx";
+import { memo, useCallback } from "react";
 
 export interface CommunityFormProps {
   readonly community?: CommunitiesQueriesGetCommunitiesDto;
@@ -41,23 +42,26 @@ const CommunityForm = ({ community, onCancel, onSave }: CommunityFormProps) => {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: Schema) => {
-    if (community) {
-      await editCommunityMutation.mutateAsync({
-        data: {
-          id: community.id,
-          ...data,
-        },
-      });
-    } else {
-      await addCommunityMutation.mutateAsync({
-        data: {
-          id: crypto.randomUUID(),
-          ...data,
-        },
-      });
-    }
-  };
+  const onSubmit = useCallback(
+    async (data: Schema) => {
+      if (community) {
+        await editCommunityMutation.mutateAsync({
+          data: {
+            id: community.id,
+            ...data,
+          },
+        });
+      } else {
+        await addCommunityMutation.mutateAsync({
+          data: {
+            id: crypto.randomUUID(),
+            ...data,
+          },
+        });
+      }
+    },
+    [addCommunityMutation, community, editCommunityMutation],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,4 +91,4 @@ const CommunityForm = ({ community, onCancel, onSave }: CommunityFormProps) => {
   );
 };
 
-export default CommunityForm;
+export default memo(CommunityForm);

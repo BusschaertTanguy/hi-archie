@@ -1,8 +1,8 @@
 import { UserContext } from "../contexts/user-context.ts";
-import { use } from "react";
+import { useContext } from "react";
 
 const useUser = () => {
-  const context = use(UserContext);
+  const context = useContext(UserContext);
 
   if (!context) {
     throw new Error("useUser must be used within the UserContext");

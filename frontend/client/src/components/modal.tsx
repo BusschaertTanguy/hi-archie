@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { memo, PropsWithChildren, useEffect, useRef } from "react";
 
 export interface ModalProps {
   readonly onClose?: () => void;
@@ -33,4 +33,4 @@ const Modal = ({ onClose, children }: PropsWithChildren<ModalProps>) => {
   );
 };
 
-export default Modal;
+export default memo(Modal);
