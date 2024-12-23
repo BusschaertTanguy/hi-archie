@@ -11,11 +11,7 @@ import { useCallback, useState } from "react";
 import CommunityForm from "./-components/community-form.tsx";
 import useUser from "../../hooks/use-user.ts";
 
-export const Route = createLazyFileRoute("/communities/")({
-  component: Communities,
-});
-
-function Communities() {
+const Communities = () => {
   const { userId } = useUser();
   const navigate = useNavigate({ from: "/communities" });
   const { pageIndex, pageSize, search } = Route.useSearch();
@@ -122,4 +118,8 @@ function Communities() {
       )}
     </>
   );
-}
+};
+
+export const Route = createLazyFileRoute("/communities/")({
+  component: Communities,
+});

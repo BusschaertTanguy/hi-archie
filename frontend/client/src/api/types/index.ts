@@ -20,6 +20,62 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
+export type PostApiV1Comments500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1Comments400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1Comments500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1Comments400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type GetApiV1CommentsParams = {
+  postId: string;
+};
+
 export type GetApiV1PostsId500 = {
   /** @nullable */
   detail?: string | null;
@@ -344,6 +400,23 @@ export interface CommunitiesCommandsEditCommunityCommand {
 export interface CommunitiesCommandsAddCommunityCommand {
   id: string;
   name: string;
+}
+
+export interface CommentsQueriesGetCommentsResponse {
+  content: string;
+  id: string;
+  ownerId: string;
+  /** @nullable */
+  parentId?: string | null;
+  publishDate: string;
+}
+
+export interface CommentsCommandsAddCommentCommand {
+  content: string;
+  id: string;
+  /** @nullable */
+  parentId?: string | null;
+  postId: string;
 }
 
 type SecondParameter<T extends (...args: any) => any> = Parameters<T>[1];
@@ -1438,3 +1511,230 @@ export function useGetApiV1PostsId<
 
   return query;
 }
+
+export const getApiV1Comments = (
+  params: GetApiV1CommentsParams,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<CommentsQueriesGetCommentsResponse[]>(
+    { url: `/api/v1/comments`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetApiV1CommentsQueryKey = (params: GetApiV1CommentsParams) => {
+  return [`/api/v1/comments`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiV1CommentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiV1Comments>>,
+  TError = ErrorType<GetApiV1Comments400 | GetApiV1Comments500>,
+>(
+  params: GetApiV1CommentsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1Comments>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiV1CommentsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiV1Comments>>
+  > = ({ signal }) => getApiV1Comments(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiV1Comments>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData> };
+};
+
+export type GetApiV1CommentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiV1Comments>>
+>;
+export type GetApiV1CommentsQueryError = ErrorType<
+  GetApiV1Comments400 | GetApiV1Comments500
+>;
+
+export function useGetApiV1Comments<
+  TData = Awaited<ReturnType<typeof getApiV1Comments>>,
+  TError = ErrorType<GetApiV1Comments400 | GetApiV1Comments500>,
+>(
+  params: GetApiV1CommentsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1Comments>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Comments>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData>;
+};
+export function useGetApiV1Comments<
+  TData = Awaited<ReturnType<typeof getApiV1Comments>>,
+  TError = ErrorType<GetApiV1Comments400 | GetApiV1Comments500>,
+>(
+  params: GetApiV1CommentsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1Comments>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Comments>>,
+          TError,
+          TData
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+export function useGetApiV1Comments<
+  TData = Awaited<ReturnType<typeof getApiV1Comments>>,
+  TError = ErrorType<GetApiV1Comments400 | GetApiV1Comments500>,
+>(
+  params: GetApiV1CommentsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1Comments>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> };
+
+export function useGetApiV1Comments<
+  TData = Awaited<ReturnType<typeof getApiV1Comments>>,
+  TError = ErrorType<GetApiV1Comments400 | GetApiV1Comments500>,
+>(
+  params: GetApiV1CommentsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiV1Comments>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof axiosInstance>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData> } {
+  const queryOptions = getGetApiV1CommentsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const postApiV1Comments = (
+  commentsCommandsAddCommentCommand: BodyType<CommentsCommandsAddCommentCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/comments`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: commentsCommandsAddCommentCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1CommentsMutationOptions = <
+  TError = ErrorType<PostApiV1Comments400 | void | PostApiV1Comments500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1Comments>>,
+    TError,
+    { data: BodyType<CommentsCommandsAddCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1Comments>>,
+  TError,
+  { data: BodyType<CommentsCommandsAddCommentCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1Comments>>,
+    { data: BodyType<CommentsCommandsAddCommentCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1Comments(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1CommentsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1Comments>>
+>;
+export type PostApiV1CommentsMutationBody =
+  BodyType<CommentsCommandsAddCommentCommand>;
+export type PostApiV1CommentsMutationError = ErrorType<
+  PostApiV1Comments400 | void | PostApiV1Comments500
+>;
+
+export const usePostApiV1Comments = <
+  TError = ErrorType<PostApiV1Comments400 | void | PostApiV1Comments500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1Comments>>,
+    TError,
+    { data: BodyType<CommentsCommandsAddCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1Comments>>,
+  TError,
+  { data: BodyType<CommentsCommandsAddCommentCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1CommentsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};

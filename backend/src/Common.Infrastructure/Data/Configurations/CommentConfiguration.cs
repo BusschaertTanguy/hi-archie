@@ -1,4 +1,4 @@
-﻿using Core.Domain.Communities.Entities;
+﻿using Core.Domain.Comments.Entities;
 using Core.Domain.Posts.Entities;
 using Core.Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -6,30 +6,30 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Common.Infrastructure.Data.Configurations;
 
-internal sealed class PostConfiguration : IEntityTypeConfiguration<Post>
+internal sealed class CommentConfiguration : IEntityTypeConfiguration<Comment>
 {
-    public void Configure(EntityTypeBuilder<Post> builder)
+    public void Configure(EntityTypeBuilder<Comment> builder)
     {
-        builder.HasKey(p => p.Id);
+        builder.HasKey(c => c.Id);
 
-        builder.Property(p => p.Id)
+        builder.Property(c => c.Id)
             .ValueGeneratedNever();
 
-        builder.Property(p => p.Title)
-            .IsRequired()
-            .HasMaxLength(50);
-        
         builder.Property(p => p.Content)
             .IsRequired()
             .HasMaxLength(10_000);
 
         builder.Property(p => p.PublishDate)
             .IsRequired();
-        
-        builder.HasOne<Community>()
+
+        builder.HasOne<Post>()
             .WithMany()
-            .HasForeignKey(p => p.CommunityId)
+            .HasForeignKey(p => p.PostId)
             .IsRequired();
+
+        builder.HasOne<Comment>()
+            .WithMany()
+            .HasForeignKey(p => p.ParentId);
 
         builder.HasOne<User>()
             .WithMany()

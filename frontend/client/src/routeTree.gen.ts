@@ -19,8 +19,8 @@ import { Route as CommunitiesCommunityIdIndexImport } from './routes/communities
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute('/')()
-const CommunitiesCommunityIdAddPostIndexLazyImport = createFileRoute(
-  '/communities/$communityId/add-post/',
+const CommunitiesCommunityIdPostsAddIndexLazyImport = createFileRoute(
+  '/communities/$communityId/posts/add/',
 )()
 const CommunitiesCommunityIdPostsPostIdIndexLazyImport = createFileRoute(
   '/communities/$communityId/posts/$postId/',
@@ -51,13 +51,13 @@ const CommunitiesCommunityIdIndexRoute =
     import('./routes/communities/$communityId/index.lazy').then((d) => d.Route),
   )
 
-const CommunitiesCommunityIdAddPostIndexLazyRoute =
-  CommunitiesCommunityIdAddPostIndexLazyImport.update({
-    id: '/communities/$communityId/add-post/',
-    path: '/communities/$communityId/add-post/',
+const CommunitiesCommunityIdPostsAddIndexLazyRoute =
+  CommunitiesCommunityIdPostsAddIndexLazyImport.update({
+    id: '/communities/$communityId/posts/add/',
+    path: '/communities/$communityId/posts/add/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
-    import('./routes/communities/$communityId/add-post/index.lazy').then(
+    import('./routes/communities/$communityId/posts/add/index.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -98,18 +98,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesCommunityIdIndexImport
       parentRoute: typeof rootRoute
     }
-    '/communities/$communityId/add-post/': {
-      id: '/communities/$communityId/add-post/'
-      path: '/communities/$communityId/add-post'
-      fullPath: '/communities/$communityId/add-post'
-      preLoaderRoute: typeof CommunitiesCommunityIdAddPostIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
     '/communities/$communityId/posts/$postId/': {
       id: '/communities/$communityId/posts/$postId/'
       path: '/communities/$communityId/posts/$postId'
       fullPath: '/communities/$communityId/posts/$postId'
       preLoaderRoute: typeof CommunitiesCommunityIdPostsPostIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/communities/$communityId/posts/add/': {
+      id: '/communities/$communityId/posts/add/'
+      path: '/communities/$communityId/posts/add'
+      fullPath: '/communities/$communityId/posts/add'
+      preLoaderRoute: typeof CommunitiesCommunityIdPostsAddIndexLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -121,16 +121,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/communities': typeof CommunitiesIndexRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdIndexRoute
-  '/communities/$communityId/add-post': typeof CommunitiesCommunityIdAddPostIndexLazyRoute
   '/communities/$communityId/posts/$postId': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
+  '/communities/$communityId/posts/add': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/communities': typeof CommunitiesIndexRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdIndexRoute
-  '/communities/$communityId/add-post': typeof CommunitiesCommunityIdAddPostIndexLazyRoute
   '/communities/$communityId/posts/$postId': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
+  '/communities/$communityId/posts/add': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -138,8 +138,8 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/communities/$communityId/': typeof CommunitiesCommunityIdIndexRoute
-  '/communities/$communityId/add-post/': typeof CommunitiesCommunityIdAddPostIndexLazyRoute
   '/communities/$communityId/posts/$postId/': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
+  '/communities/$communityId/posts/add/': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -148,22 +148,22 @@ export interface FileRouteTypes {
     | '/'
     | '/communities'
     | '/communities/$communityId'
-    | '/communities/$communityId/add-post'
     | '/communities/$communityId/posts/$postId'
+    | '/communities/$communityId/posts/add'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/communities'
     | '/communities/$communityId'
-    | '/communities/$communityId/add-post'
     | '/communities/$communityId/posts/$postId'
+    | '/communities/$communityId/posts/add'
   id:
     | '__root__'
     | '/'
     | '/communities/'
     | '/communities/$communityId/'
-    | '/communities/$communityId/add-post/'
     | '/communities/$communityId/posts/$postId/'
+    | '/communities/$communityId/posts/add/'
   fileRoutesById: FileRoutesById
 }
 
@@ -171,18 +171,18 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   CommunitiesIndexRoute: typeof CommunitiesIndexRoute
   CommunitiesCommunityIdIndexRoute: typeof CommunitiesCommunityIdIndexRoute
-  CommunitiesCommunityIdAddPostIndexLazyRoute: typeof CommunitiesCommunityIdAddPostIndexLazyRoute
   CommunitiesCommunityIdPostsPostIdIndexLazyRoute: typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
+  CommunitiesCommunityIdPostsAddIndexLazyRoute: typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   CommunitiesIndexRoute: CommunitiesIndexRoute,
   CommunitiesCommunityIdIndexRoute: CommunitiesCommunityIdIndexRoute,
-  CommunitiesCommunityIdAddPostIndexLazyRoute:
-    CommunitiesCommunityIdAddPostIndexLazyRoute,
   CommunitiesCommunityIdPostsPostIdIndexLazyRoute:
     CommunitiesCommunityIdPostsPostIdIndexLazyRoute,
+  CommunitiesCommunityIdPostsAddIndexLazyRoute:
+    CommunitiesCommunityIdPostsAddIndexLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -198,8 +198,8 @@ export const routeTree = rootRoute
         "/",
         "/communities/",
         "/communities/$communityId/",
-        "/communities/$communityId/add-post/",
-        "/communities/$communityId/posts/$postId/"
+        "/communities/$communityId/posts/$postId/",
+        "/communities/$communityId/posts/add/"
       ]
     },
     "/": {
@@ -211,11 +211,11 @@ export const routeTree = rootRoute
     "/communities/$communityId/": {
       "filePath": "communities/$communityId/index.tsx"
     },
-    "/communities/$communityId/add-post/": {
-      "filePath": "communities/$communityId/add-post/index.lazy.tsx"
-    },
     "/communities/$communityId/posts/$postId/": {
       "filePath": "communities/$communityId/posts/$postId/index.lazy.tsx"
+    },
+    "/communities/$communityId/posts/add/": {
+      "filePath": "communities/$communityId/posts/add/index.lazy.tsx"
     }
   }
 }

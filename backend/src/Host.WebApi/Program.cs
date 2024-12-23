@@ -88,8 +88,10 @@ var api = app.MapGroup("api");
 api.ProducesProblem((int)HttpStatusCode.InternalServerError);
 
 var v1 = api.MapGroup("v1");
+
 v1.MapUserRoutes();
 v1.MapCommunityRoutes();
 v1.MapPostRoutes();
+v1.MapCommentRoutes();
 
 app.Run();

@@ -67,7 +67,7 @@ public static class AddPost
 
             RuleFor(x => x.Content)
                 .NotEmpty()
-                .MaximumLength(10000);
+                .MaximumLength(10_000);
         }
     }
 }

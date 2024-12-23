@@ -3,6 +3,7 @@ using Common.Application.Queries;
 using Common.Infrastructure.Data.Commands;
 using Common.Infrastructure.Data.Queries;
 using Common.Infrastructure.Data.Repositories;
+using Core.Domain.Comments.Repositories;
 using Core.Domain.Communities.Repositories;
 using Core.Domain.Posts.Repositories;
 using Core.Domain.Users.Repositories;
@@ -22,6 +23,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IQueryProcessor, EfQueryProcessor>()
             .AddTransient<ICommunityRepository, EfCommunityRepository>()
             .AddTransient<IPostRepository, EfPostRepository>()
+            .AddTransient<ICommentRepository, EfCommentRepository>()
             .AddTransient<ISubscriptionRepository, EfSubscriptionRepository>()
             .AddTransient<IUserRepository, EfUserRepository>();
     }

@@ -8,11 +8,7 @@ import {
 import Button from "../../../components/button.tsx";
 import useUser from "../../../hooks/use-user.ts";
 
-export const Route = createLazyFileRoute("/communities/$communityId/")({
-  component: Community,
-});
-
-function Community() {
+const Community = () => {
   const { userId, joinedCommunities, refresh } = useUser();
 
   const navigate = Route.useNavigate();
@@ -55,7 +51,7 @@ function Community() {
               className="flex items-center justify-center gap-0.5"
               onClick={() =>
                 navigate({
-                  to: "/communities/$communityId/add-post",
+                  to: "/communities/$communityId/posts/add",
                   params: { communityId },
                 })
               }
@@ -136,4 +132,8 @@ function Community() {
       </div>
     </div>
   );
-}
+};
+
+export const Route = createLazyFileRoute("/communities/$communityId/")({
+  component: Community,
+});

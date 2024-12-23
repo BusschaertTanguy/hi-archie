@@ -1,17 +1,13 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
-import FormTextInput from "../../../../components/form-text-input.tsx";
-import FormTextAreaInput from "../../../../components/form-text-area-input.tsx";
-import Button from "../../../../components/button.tsx";
+import { createLazyFileRoute, Navigate } from "@tanstack/react-router";
+import FormTextInput from "../../../../../components/form-text-input.tsx";
+import FormTextAreaInput from "../../../../../components/form-text-area-input.tsx";
+import Button from "../../../../../components/button.tsx";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usePostApiV1Posts } from "../../../../api/types";
-
-export const Route = createLazyFileRoute("/communities/$communityId/add-post/")(
-  {
-    component: AddPost,
-  },
-);
+import { usePostApiV1Posts } from "../../../../../api/types";
+import useUser from "../../../../../hooks/use-user.ts";
+import { useCallback } from "react";
 
 const schema = z.object({
   title: z.string().min(1).max(50),
@@ -20,7 +16,8 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-function AddPost() {
+const AddPost = () => {
+  const { joinedCommunities } = useUser();
   const addPostMutation = usePostApiV1Posts();
   const { communityId } = Route.useParams();
   const navigate = Route.useNavigate();
@@ -33,17 +30,24 @@ function AddPost() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: Schema) => {
-    await addPostMutation.mutateAsync({
-      data: {
-        id: crypto.randomUUID(),
-        communityId,
-        ...data,
-      },
-    });
+  const onSubmit = useCallback(
+    async (data: Schema) => {
+      await addPostMutation.mutateAsync({
+        data: {
+          id: crypto.randomUUID(),
+          communityId,
+          ...data,
+        },
+      });
 
-    await navigate({ to: ".." });
-  };
+      await navigate({ to: ".." });
+    },
+    [addPostMutation, communityId, navigate],
+  );
+
+  if (!joinedCommunities?.includes(communityId)) {
+    return <Navigate to={".."} />;
+  }
 
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
@@ -75,4 +79,10 @@ function AddPost() {
       </div>
     </form>
   );
-}
+};
+
+export const Route = createLazyFileRoute(
+  "/communities/$communityId/posts/add/",
+)({
+  component: AddPost,
+});
