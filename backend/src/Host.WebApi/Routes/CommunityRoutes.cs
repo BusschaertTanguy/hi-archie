@@ -97,7 +97,7 @@ public static class CommunityRoutes
                 [FromServices] ICommandHandler<EditCommunity.Command> handler,
                 [FromBody] EditCommunity.Command command) =>
             {
-                var community = await communityRepository.GetById(command.Id);
+                var community = await communityRepository.GetByIdAsync(command.Id);
                 var authorizationResult =
                     await authorizationService.AuthorizeAsync(user, community, new UserIsOwnerRequirement());
 
@@ -107,6 +107,31 @@ public static class CommunityRoutes
                 }
 
                 var result = await handler.HandleAsync(command);
+                return result.ToHttpResult();
+            })
+            .Produces((int)HttpStatusCode.NoContent)
+            .Produces((int)HttpStatusCode.Unauthorized)
+            .Produces((int)HttpStatusCode.Forbidden)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization();
+
+        group
+            .MapDelete("{id:guid}", async (
+                ClaimsPrincipal user,
+                [FromServices] ICommunityRepository communityRepository,
+                [FromServices] IAuthorizationService authorizationService,
+                [FromServices] ICommandHandler<RemoveCommunity.Command> handler,
+                [FromRoute] Guid id) =>
+            {
+                var community = await communityRepository.GetByIdAsync(id);
+                var authorizationResult = await authorizationService.AuthorizeAsync(user, community, new UserIsOwnerRequirement());
+
+                if (!authorizationResult.Succeeded)
+                {
+                    return Results.Forbid();
+                }
+
+                var result = await handler.HandleAsync(new(id));
                 return result.ToHttpResult();
             })
             .Produces((int)HttpStatusCode.NoContent)

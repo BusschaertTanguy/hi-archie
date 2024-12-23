@@ -63,7 +63,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddTransient<IAuthorizationHandler, UserIsOwnerAuthorizationHandler>();
+builder.Services.AddTransient<IAuthorizationHandler, UserIsCommunityOwnerAuthorizationHandler>();
+builder.Services.AddTransient<IAuthorizationHandler, UserIsPostOwnerAuthorizationHandler>();
+builder.Services.AddTransient<IAuthorizationHandler, UserIsCommentOwnerAuthorizationHandler>();
 
 var app = builder.Build();
 

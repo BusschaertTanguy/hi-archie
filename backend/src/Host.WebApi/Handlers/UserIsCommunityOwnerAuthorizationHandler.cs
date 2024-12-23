@@ -6,11 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Host.WebApi.Handlers;
 
-internal sealed class UserIsOwnerAuthorizationHandler(IUserRepository userRepository)
-    : AuthorizationHandler<UserIsOwnerRequirement, Community>
+internal sealed class UserIsCommunityOwnerAuthorizationHandler(IUserRepository userRepository) : AuthorizationHandler<UserIsOwnerRequirement, Community>
 {
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
-        UserIsOwnerRequirement requirement, Community resource)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, UserIsOwnerRequirement requirement, Community resource)
     {
         var externalId = context.User.GetSubjectClaimValue();
         if (string.IsNullOrWhiteSpace(externalId))

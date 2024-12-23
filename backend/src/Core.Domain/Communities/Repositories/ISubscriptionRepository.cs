@@ -7,5 +7,5 @@ public interface ISubscriptionRepository
     Task<bool> ExistsAsync(Guid communityId, Guid userId);
     Task AddAsync(Subscription subscription);
     Task<Subscription> GetByIdAsync(Guid communityId, Guid userId);
-    Task DeleteAsync(Subscription subscription);
+    Task RemoveAsync(Subscription subscription);
 }

@@ -5,14 +5,11 @@ using FluentValidation;
 
 namespace Core.Application.Communities.Commands;
 
-public static class EditCommunity
+public static class RemoveCommunity
 {
-    public sealed record Command(Guid Id, string Name) : ICommand;
+    public sealed record Command(Guid Id) : ICommand;
 
-    internal sealed class Handler(
-        IValidator<Command> validator,
-        IUnitOfWork unitOfWork,
-        ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -22,12 +19,8 @@ public static class EditCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var (id, name) = command;
-
-            var community = await communityRepository.GetByIdAsync(id);
-
-            community.Name = name;
-
+            var community = await communityRepository.GetByIdAsync(command.Id);
+            await communityRepository.RemoveAsync(community);
             await unitOfWork.CommitAsync();
 
             return Result.Success();
@@ -38,12 +31,8 @@ public static class EditCommunity
     {
         public Validator()
         {
-            RuleFor(c => c.Id)
+            RuleFor(x => x.Id)
                 .NotEmpty();
-
-            RuleFor(c => c.Name)
-                .NotEmpty()
-                .MaximumLength(50);
         }
     }
 }

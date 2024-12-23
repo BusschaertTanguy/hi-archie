@@ -5,5 +5,6 @@ namespace Core.Domain.Communities.Repositories;
 public interface ICommunityRepository
 {
     Task AddAsync(Community community);
-    Task<Community> GetById(Guid id);
+    Task<Community> GetByIdAsync(Guid id);
+    Task RemoveAsync(Community community);
 }

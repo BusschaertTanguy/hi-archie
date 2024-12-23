@@ -20,6 +20,32 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
+export type PutApiV1Comments500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PutApiV1Comments400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
 export type PostApiV1Comments500 = {
   /** @nullable */
   detail?: string | null;
@@ -76,6 +102,32 @@ export type GetApiV1CommentsParams = {
   postId: string;
 };
 
+export type DeleteApiV1PostsId500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type DeleteApiV1PostsId400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
 export type GetApiV1PostsId500 = {
   /** @nullable */
   detail?: string | null;
@@ -90,6 +142,32 @@ export type GetApiV1PostsId500 = {
 };
 
 export type GetApiV1PostsId400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PutApiV1Posts500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PutApiV1Posts400 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -201,6 +279,32 @@ export type PostApiV1CommunitiesJoin500 = {
 };
 
 export type PostApiV1CommunitiesJoin400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type DeleteApiV1CommunitiesId500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type DeleteApiV1CommunitiesId400 = {
   /** @nullable */
   detail?: string | null;
   /** @nullable */
@@ -360,6 +464,12 @@ export interface PostsQueriesGetPostResponse {
   title: string;
 }
 
+export interface PostsCommandsEditPostCommand {
+  content: string;
+  id: string;
+  title: string;
+}
+
 export interface PostsCommandsAddPostCommand {
   communityId: string;
   content: string;
@@ -409,6 +519,11 @@ export interface CommentsQueriesGetCommentsResponse {
   /** @nullable */
   parentId?: string | null;
   publishDate: string;
+}
+
+export interface CommentsCommandsEditCommentCommand {
+  content: string;
+  id: string;
 }
 
 export interface CommentsCommandsAddCommentCommand {
@@ -989,6 +1104,81 @@ export function useGetApiV1CommunitiesId<
   return query;
 }
 
+export const deleteApiV1CommunitiesId = (
+  id: string,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<void>(
+    { url: `/api/v1/communities/${id}`, method: "DELETE" },
+    options,
+  );
+};
+
+export const getDeleteApiV1CommunitiesIdMutationOptions = <
+  TError = ErrorType<
+    DeleteApiV1CommunitiesId400 | void | DeleteApiV1CommunitiesId500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteApiV1CommunitiesId(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteApiV1CommunitiesIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>
+>;
+
+export type DeleteApiV1CommunitiesIdMutationError = ErrorType<
+  DeleteApiV1CommunitiesId400 | void | DeleteApiV1CommunitiesId500
+>;
+
+export const useDeleteApiV1CommunitiesId = <
+  TError = ErrorType<
+    DeleteApiV1CommunitiesId400 | void | DeleteApiV1CommunitiesId500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteApiV1CommunitiesId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteApiV1CommunitiesIdMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
 export const postApiV1CommunitiesJoin = (
   communitiesCommandsJoinCommunityCommand: BodyType<CommunitiesCommandsJoinCommunityCommand>,
   options?: SecondParameter<typeof axiosInstance>,
@@ -1360,6 +1550,82 @@ export const usePostApiV1Posts = <
   return useMutation(mutationOptions);
 };
 
+export const putApiV1Posts = (
+  postsCommandsEditPostCommand: BodyType<PostsCommandsEditPostCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/posts`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: postsCommandsEditPostCommand,
+    },
+    options,
+  );
+};
+
+export const getPutApiV1PostsMutationOptions = <
+  TError = ErrorType<PutApiV1Posts400 | void | PutApiV1Posts500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Posts>>,
+    TError,
+    { data: BodyType<PostsCommandsEditPostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putApiV1Posts>>,
+  TError,
+  { data: BodyType<PostsCommandsEditPostCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putApiV1Posts>>,
+    { data: BodyType<PostsCommandsEditPostCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return putApiV1Posts(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutApiV1PostsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putApiV1Posts>>
+>;
+export type PutApiV1PostsMutationBody = BodyType<PostsCommandsEditPostCommand>;
+export type PutApiV1PostsMutationError = ErrorType<
+  PutApiV1Posts400 | void | PutApiV1Posts500
+>;
+
+export const usePutApiV1Posts = <
+  TError = ErrorType<PutApiV1Posts400 | void | PutApiV1Posts500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Posts>>,
+    TError,
+    { data: BodyType<PostsCommandsEditPostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof putApiV1Posts>>,
+  TError,
+  { data: BodyType<PostsCommandsEditPostCommand> },
+  TContext
+> => {
+  const mutationOptions = getPutApiV1PostsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
 export const getApiV1PostsId = (
   id: string,
   options?: SecondParameter<typeof axiosInstance>,
@@ -1511,6 +1777,77 @@ export function useGetApiV1PostsId<
 
   return query;
 }
+
+export const deleteApiV1PostsId = (
+  id: string,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<void>(
+    { url: `/api/v1/posts/${id}`, method: "DELETE" },
+    options,
+  );
+};
+
+export const getDeleteApiV1PostsIdMutationOptions = <
+  TError = ErrorType<DeleteApiV1PostsId400 | void | DeleteApiV1PostsId500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1PostsId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteApiV1PostsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteApiV1PostsId>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteApiV1PostsId(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteApiV1PostsIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteApiV1PostsId>>
+>;
+
+export type DeleteApiV1PostsIdMutationError = ErrorType<
+  DeleteApiV1PostsId400 | void | DeleteApiV1PostsId500
+>;
+
+export const useDeleteApiV1PostsId = <
+  TError = ErrorType<DeleteApiV1PostsId400 | void | DeleteApiV1PostsId500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteApiV1PostsId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteApiV1PostsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteApiV1PostsIdMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
 
 export const getApiV1Comments = (
   params: GetApiV1CommentsParams,
@@ -1735,6 +2072,83 @@ export const usePostApiV1Comments = <
   TContext
 > => {
   const mutationOptions = getPostApiV1CommentsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const putApiV1Comments = (
+  commentsCommandsEditCommentCommand: BodyType<CommentsCommandsEditCommentCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/comments`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      data: commentsCommandsEditCommentCommand,
+    },
+    options,
+  );
+};
+
+export const getPutApiV1CommentsMutationOptions = <
+  TError = ErrorType<PutApiV1Comments400 | void | PutApiV1Comments500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Comments>>,
+    TError,
+    { data: BodyType<CommentsCommandsEditCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof putApiV1Comments>>,
+  TError,
+  { data: BodyType<CommentsCommandsEditCommentCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof putApiV1Comments>>,
+    { data: BodyType<CommentsCommandsEditCommentCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return putApiV1Comments(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PutApiV1CommentsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof putApiV1Comments>>
+>;
+export type PutApiV1CommentsMutationBody =
+  BodyType<CommentsCommandsEditCommentCommand>;
+export type PutApiV1CommentsMutationError = ErrorType<
+  PutApiV1Comments400 | void | PutApiV1Comments500
+>;
+
+export const usePutApiV1Comments = <
+  TError = ErrorType<PutApiV1Comments400 | void | PutApiV1Comments500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof putApiV1Comments>>,
+    TError,
+    { data: BodyType<CommentsCommandsEditCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof putApiV1Comments>>,
+  TError,
+  { data: BodyType<CommentsCommandsEditCommentCommand> },
+  TContext
+> => {
+  const mutationOptions = getPutApiV1CommentsMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

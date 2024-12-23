@@ -1,19 +1,15 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CommunitiesQueriesGetCommunitiesDto,
-  usePostApiV1Communities,
-  usePutApiV1Communities,
-} from "../../../api/types";
+import { CommunitiesQueriesGetCommunityResponse } from "../../../api/types";
 import Button from "../../../components/button.tsx";
 import FormTextInput from "../../../components/form-text-input.tsx";
-import { memo, useCallback } from "react";
+import { memo } from "react";
 
 export interface CommunityFormProps {
-  readonly community?: CommunitiesQueriesGetCommunitiesDto;
-  readonly onCancel?: () => void;
-  readonly onSave?: () => void;
+  readonly community?: CommunitiesQueriesGetCommunityResponse;
+  readonly onCancel: () => void;
+  readonly onSubmit: (data: Schema) => Promise<void>;
 }
 
 const schema = z.object({
@@ -22,15 +18,11 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 
-const CommunityForm = ({ community, onCancel, onSave }: CommunityFormProps) => {
-  const addCommunityMutation = usePostApiV1Communities({
-    mutation: { onSuccess: onSave },
-  });
-
-  const editCommunityMutation = usePutApiV1Communities({
-    mutation: { onSuccess: onSave },
-  });
-
+const CommunityForm = ({
+  community,
+  onCancel,
+  onSubmit,
+}: CommunityFormProps) => {
   const {
     register,
     handleSubmit,
@@ -41,27 +33,6 @@ const CommunityForm = ({ community, onCancel, onSave }: CommunityFormProps) => {
     },
     resolver: zodResolver(schema),
   });
-
-  const onSubmit = useCallback(
-    async (data: Schema) => {
-      if (community) {
-        await editCommunityMutation.mutateAsync({
-          data: {
-            id: community.id,
-            ...data,
-          },
-        });
-      } else {
-        await addCommunityMutation.mutateAsync({
-          data: {
-            id: crypto.randomUUID(),
-            ...data,
-          },
-        });
-      }
-    },
-    [addCommunityMutation, community, editCommunityMutation],
-  );
 
   return (
     <div className="flex flex-col gap-6">

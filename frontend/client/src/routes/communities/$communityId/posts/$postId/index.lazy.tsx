@@ -1,9 +1,12 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   CommentsQueriesGetCommentsResponse,
+  useDeleteApiV1PostsId,
   useGetApiV1Comments,
+  useGetApiV1CommunitiesId,
   useGetApiV1PostsId,
   usePostApiV1Comments,
+  usePutApiV1Comments,
 } from "../../../../../api/types";
 import FormTextAreaInput from "../../../../../components/form-text-area-input.tsx";
 import { z } from "zod";
@@ -11,14 +14,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "../../../../../components/button.tsx";
 import useDisclosure from "../../../../../hooks/use-disclosure.ts";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Comment, { CommentNode } from "./-components/comment.tsx";
+import useUser from "../../../../../hooks/use-user.ts";
 
 const schema = z.object({
   content: z.string().min(1).max(10000),
 });
 
-export type CommentReplySchema = z.infer<typeof schema>;
+export type CommentSchema = z.infer<typeof schema>;
+export interface CommentAction {
+  readonly comment: CommentsQueriesGetCommentsResponse;
+  readonly action: "reply" | "edit";
+}
 
 const buildCommentNode = (
   comment: CommentsQueriesGetCommentsResponse,
@@ -33,25 +41,30 @@ const buildCommentNode = (
 };
 
 const Post = () => {
-  const { postId } = Route.useParams();
+  const { userId } = useUser();
+  const { communityId, postId } = Route.useParams();
+  const navigate = Route.useNavigate();
 
   const {
     isOpen,
     handlers: { toggle },
   } = useDisclosure();
 
-  const [replyId, setReplyId] = useState<string>();
+  const [commentAction, setCommentAction] = useState<CommentAction>();
 
-  const form = useForm<CommentReplySchema>({
+  const form = useForm<CommentSchema>({
     resolver: zodResolver(schema),
   });
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
     reset,
   } = form;
+
+  const communityQuery = useGetApiV1CommunitiesId(communityId);
 
   const postQuery = useGetApiV1PostsId(postId);
 
@@ -66,8 +79,8 @@ const Post = () => {
           toggle();
         }
 
-        if (replyId) {
-          setReplyId(undefined);
+        if (commentAction) {
+          setCommentAction(undefined);
         }
 
         reset();
@@ -75,30 +88,82 @@ const Post = () => {
     },
   });
 
-  const onSubmit = useCallback(
-    async (data: CommentReplySchema) => {
-      await addCommentMutation.mutateAsync({
-        data: {
-          id: crypto.randomUUID(),
-          postId,
-          content: data.content,
-          parentId: replyId,
-        },
-      });
+  const editCommentMutation = usePutApiV1Comments({
+    mutation: {
+      onSuccess: async () => {
+        await commentsQuery.refetch();
 
-      reset();
+        if (isOpen) {
+          toggle();
+        }
+
+        if (commentAction) {
+          setCommentAction(undefined);
+        }
+
+        reset();
+      },
     },
-    [addCommentMutation, postId, replyId, reset],
+  });
+
+  const removeMutation = useDeleteApiV1PostsId({
+    mutation: {
+      onSuccess: () =>
+        navigate({
+          to: "/communities/$communityId",
+          params: { communityId },
+          search: { pageIndex: 0, pageSize: 25 },
+        }),
+    },
+  });
+
+  const onSubmitComment = useCallback(
+    async (data: CommentSchema) => {
+      if (!commentAction) {
+        await addCommentMutation.mutateAsync({
+          data: {
+            id: crypto.randomUUID(),
+            postId,
+            content: data.content,
+          },
+        });
+      }
+
+      if (commentAction && commentAction.action === "reply") {
+        await addCommentMutation.mutateAsync({
+          data: {
+            id: crypto.randomUUID(),
+            postId,
+            content: data.content,
+            parentId: commentAction.comment.id,
+          },
+        });
+      }
+
+      if (commentAction && commentAction.action === "edit") {
+        await editCommentMutation.mutateAsync({
+          data: {
+            id: commentAction.comment.id,
+            content: data.content,
+          },
+        });
+      }
+    },
+    [commentAction, addCommentMutation, postId, editCommentMutation],
   );
 
-  const onCancelReply = useCallback(() => {
-    setReplyId(undefined);
+  const onCancelComment = useCallback(() => {
     reset();
+    setCommentAction(undefined);
   }, [reset]);
 
-  const onSelectReply = useCallback((replyId: string) => {
-    setReplyId(replyId);
-  }, []);
+  const onSelectComment = useCallback(
+    (action: CommentAction) => {
+      reset();
+      setCommentAction(action);
+    },
+    [reset],
+  );
 
   const parentNodes = useMemo(
     () =>
@@ -108,24 +173,73 @@ const Post = () => {
     [commentsQuery.data],
   );
 
+  useEffect(() => {
+    setValue(
+      "content",
+      !commentAction || commentAction.action === "reply"
+        ? ""
+        : commentAction.comment.content,
+    );
+  }, [commentAction, setValue]);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
+          <div
+            className="text-sm hover:cursor-pointer"
+            onClick={() =>
+              navigate({
+                to: "/communities/$communityId",
+                params: { communityId },
+                search: { pageIndex: 0, pageSize: 25 },
+              })
+            }
+          >
+            {communityQuery.data?.name}
+          </div>
           <div className="text-2xl">{postQuery.data?.title}</div>
           <div className="text-xs">
             {new Date(postQuery.data?.publishDate ?? "").toLocaleString()}
           </div>
         </div>
-        <Button color="black" variant="filled" onClick={toggle}>
-          COMMENT
-        </Button>
+        <div className="flex gap-2">
+          <Button color="black" variant="filled" onClick={toggle}>
+            COMMENT
+          </Button>
+          {userId && postQuery.data?.ownerId === userId && (
+            <>
+              <Button
+                color="blue"
+                variant="filled"
+                onClick={() =>
+                  navigate({
+                    to: "/communities/$communityId/posts/$postId/edit",
+                    params: { communityId, postId },
+                  })
+                }
+              >
+                EDIT
+              </Button>
+              <Button
+                color="red"
+                variant="filled"
+                onClick={() => removeMutation.mutateAsync({ id: postId })}
+              >
+                REMOVE
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       <div className="rounded border border-black p-3">
         {postQuery.data?.content}
       </div>
       {isOpen && (
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="flex flex-col gap-6"
+          onSubmit={handleSubmit(onSubmitComment)}
+        >
           <FormTextAreaInput
             label="Add Comment"
             maxLength={10000}
@@ -158,10 +272,10 @@ const Post = () => {
             key={c.comment.id}
             node={c}
             form={form}
-            selectedReply={replyId}
-            onSubmitReply={onSubmit}
-            onCancelReply={onCancelReply}
-            onSelectReply={onSelectReply}
+            commentAction={commentAction}
+            onSubmitComment={onSubmitComment}
+            onCancelComment={onCancelComment}
+            onSelectComment={onSelectComment}
           />
         ))}
       </div>

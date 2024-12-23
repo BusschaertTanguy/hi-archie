@@ -1,5 +1,6 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
 import {
+  useDeleteApiV1CommunitiesId,
   useGetApiV1CommunitiesId,
   useGetApiV1Posts,
   usePostApiV1CommunitiesJoin,
@@ -16,6 +17,7 @@ const Community = () => {
   const { pageIndex, pageSize, search } = Route.useSearch();
 
   const communityQuery = useGetApiV1CommunitiesId(communityId);
+
   const postsQuery = useGetApiV1Posts({
     pageIndex,
     pageSize,
@@ -39,63 +41,100 @@ const Community = () => {
     },
   });
 
+  const deleteMutation = useDeleteApiV1CommunitiesId({
+    mutation: {
+      onSuccess: () =>
+        navigate({
+          to: "/communities",
+          search: { pageIndex: 0, pageSize: 25 },
+        }),
+    },
+  });
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div className="text-2xl">{communityQuery.data?.name}</div>
-        {userId && joinedCommunities?.includes(communityId) && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {userId && joinedCommunities?.includes(communityId) && (
+            <>
+              <Button
+                color="black"
+                variant="filled"
+                className="flex items-center justify-center gap-0.5"
+                onClick={() =>
+                  navigate({
+                    to: "/communities/$communityId/posts/add",
+                    params: { communityId },
+                  })
+                }
+              >
+                POST
+              </Button>
+              <Button
+                color="black"
+                variant="outlined"
+                className="flex items-center justify-center gap-0.5"
+                onClick={() =>
+                  leaveMutation.mutateAsync({
+                    data: {
+                      communityId,
+                    },
+                  })
+                }
+              >
+                LEAVE
+              </Button>
+            </>
+          )}
+          {userId && !joinedCommunities?.includes(communityId) && (
             <Button
               color="black"
               variant="filled"
               className="flex items-center justify-center gap-0.5"
               onClick={() =>
-                navigate({
-                  to: "/communities/$communityId/posts/add",
-                  params: { communityId },
-                })
-              }
-            >
-              POST
-            </Button>
-            <Button
-              color="black"
-              variant="outlined"
-              className="flex items-center justify-center gap-0.5"
-              onClick={() =>
-                leaveMutation.mutateAsync({
+                joinMutation.mutateAsync({
                   data: {
                     communityId,
                   },
                 })
               }
             >
-              LEAVE
+              JOIN
             </Button>
-          </div>
-        )}
-        {userId && !joinedCommunities?.includes(communityId) && (
-          <Button
-            color="black"
-            variant="filled"
-            className="flex items-center justify-center gap-0.5"
-            onClick={() =>
-              joinMutation.mutateAsync({
-                data: {
-                  communityId,
-                },
-              })
-            }
-          >
-            JOIN
-          </Button>
-        )}
+          )}
+          {userId && communityQuery.data?.ownerId === userId && (
+            <>
+              <Button
+                color="blue"
+                variant="filled"
+                className="flex items-center justify-center gap-0.5"
+                onClick={() =>
+                  navigate({
+                    to: "/communities/$communityId/edit",
+                    params: { communityId },
+                  })
+                }
+              >
+                EDIT
+              </Button>
+              <Button
+                color="red"
+                variant="filled"
+                className="flex items-center justify-center gap-0.5"
+                onClick={() => deleteMutation.mutateAsync({ id: communityId })}
+              >
+                REMOVE
+              </Button>
+            </>
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-4">
         {postsQuery.data?.posts.map((post) => (
           <div
             key={post.id}
-            className="rounded p-4 outline outline-1 outline-black"
+            className="rounded p-4 outline outline-1 outline-black hover:cursor-pointer"
             onClick={() =>
               navigate({
                 to: "/communities/$communityId/posts/$postId",

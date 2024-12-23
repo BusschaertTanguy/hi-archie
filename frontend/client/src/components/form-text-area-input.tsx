@@ -10,7 +10,7 @@ import { FieldError } from "react-hook-form";
 interface FormInputProps
   extends ClassAttributes<HTMLTextAreaElement>,
     TextareaHTMLAttributes<HTMLTextAreaElement> {
-  readonly label: string;
+  readonly label?: string;
   readonly error?: FieldError;
 }
 
@@ -23,7 +23,7 @@ const FormTextAreaInput = forwardRef<HTMLTextAreaElement, FormInputProps>(
 
     return (
       <div className="flex flex-col gap-2">
-        <label htmlFor={props.id}>{label}</label>
+        {label && <label htmlFor={props.id}>{label}</label>}
         <textarea {...props} className={className} ref={ref} />
         {error && <p className="text-red-500">{error.message}</p>}
       </div>

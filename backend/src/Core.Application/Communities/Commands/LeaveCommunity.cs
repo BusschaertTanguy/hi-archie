@@ -25,7 +25,7 @@ public static class LeaveCommunity
             }
 
             var subscription = await subscriptionRepository.GetByIdAsync(command.CommunityId, command.UserId);
-            await subscriptionRepository.DeleteAsync(subscription);
+            await subscriptionRepository.RemoveAsync(subscription);
             await unitOfWork.CommitAsync();
 
             return Result.Success();

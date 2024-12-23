@@ -3,7 +3,7 @@ import Button from "../../../../../../components/button.tsx";
 import FormTextAreaInput from "../../../../../../components/form-text-area-input.tsx";
 import { CommentsQueriesGetCommentsResponse } from "../../../../../../api/types";
 import { UseFormReturn } from "react-hook-form";
-import { CommentReplySchema } from "../index.lazy.tsx";
+import { CommentAction, CommentSchema } from "../index.lazy.tsx";
 
 export interface CommentNode {
   readonly children?: CommentNode[];
@@ -12,20 +12,20 @@ export interface CommentNode {
 
 interface CommentProps {
   readonly node: CommentNode;
-  readonly form: UseFormReturn<CommentReplySchema>;
-  readonly selectedReply?: string;
-  readonly onSubmitReply: (data: CommentReplySchema) => Promise<void>;
-  readonly onCancelReply: () => void;
-  readonly onSelectReply: (replyId: string) => void;
+  readonly form: UseFormReturn<CommentSchema>;
+  readonly commentAction?: CommentAction;
+  readonly onSubmitComment: (data: CommentSchema) => Promise<void>;
+  readonly onCancelComment: () => void;
+  readonly onSelectComment: (commentAction: CommentAction) => void;
 }
 
 const Comment = ({
   node,
   form,
-  selectedReply,
-  onSubmitReply,
-  onSelectReply,
-  onCancelReply,
+  commentAction,
+  onSubmitComment,
+  onSelectComment,
+  onCancelComment,
 }: CommentProps) => {
   const {
     register,
@@ -45,26 +45,45 @@ const Comment = ({
           </span>
         </div>
         <div>{comment.content}</div>
-        <span
-          className="text-xs text-slate-500 hover:cursor-pointer hover:underline"
-          onClick={() => {
-            if (selectedReply) {
-              onCancelReply();
-            } else {
-              onSelectReply(comment.id);
-            }
-          }}
-        >
-          Reply
-        </span>
+        <div className="flex gap-1.5">
+          <span
+            className="text-xs text-slate-500 hover:cursor-pointer hover:underline"
+            onClick={() => {
+              if (
+                commentAction?.action === "reply" &&
+                commentAction.comment.id === comment.id
+              ) {
+                onCancelComment();
+              } else {
+                onSelectComment({ comment: comment, action: "reply" });
+              }
+            }}
+          >
+            Reply
+          </span>
+          <span
+            className="text-xs text-slate-500 hover:cursor-pointer hover:underline"
+            onClick={() => {
+              if (
+                commentAction?.action === "edit" &&
+                commentAction.comment.id === comment.id
+              ) {
+                onCancelComment();
+              } else {
+                onSelectComment({ comment: comment, action: "edit" });
+              }
+            }}
+          >
+            Edit
+          </span>
+        </div>
       </div>
-      {selectedReply === comment.id && (
+      {commentAction?.comment.id === comment.id && (
         <form
-          className="flex flex-col gap-6 border-t border-slate-300 pt-3"
-          onSubmit={handleSubmit(onSubmitReply)}
+          className="flex flex-col gap-6 pt-3"
+          onSubmit={handleSubmit(onSubmitComment)}
         >
           <FormTextAreaInput
-            label="Reply"
             maxLength={10000}
             rows={10}
             className="resize-none"
@@ -76,7 +95,7 @@ const Comment = ({
               type="button"
               color="black"
               variant="outlined"
-              onClick={onCancelReply}
+              onClick={onCancelComment}
             >
               CANCEL
             </Button>
@@ -92,10 +111,10 @@ const Comment = ({
             key={childNode.comment.id}
             node={childNode}
             form={form}
-            selectedReply={selectedReply}
-            onSubmitReply={onSubmitReply}
-            onCancelReply={onCancelReply}
-            onSelectReply={onSelectReply}
+            commentAction={commentAction}
+            onSubmitComment={onSubmitComment}
+            onCancelComment={onCancelComment}
+            onSelectComment={onSelectComment}
           />
         ))}
       </div>

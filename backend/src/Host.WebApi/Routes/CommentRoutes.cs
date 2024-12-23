@@ -1,9 +1,13 @@
 ﻿using System.Net;
+using System.Security.Claims;
 using Common.Application.Commands;
 using Common.Application.Queries;
 using Core.Application.Comments.Commands;
 using Core.Application.Comments.Queries;
+using Core.Domain.Comments.Repositories;
 using Host.WebApi.Extensions;
+using Host.WebApi.Requirements;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Host.WebApi.Routes;
@@ -37,5 +41,30 @@ public static class CommentRoutes
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .RequireAuthorization()
             .RequireUser();
+
+        group
+            .MapPut("", async (
+                ClaimsPrincipal user,
+                [FromServices] ICommentRepository commentRepository,
+                [FromServices] IAuthorizationService authorizationService,
+                [FromServices] ICommandHandler<EditComment.Command> handler,
+                [FromBody] EditComment.Command command) =>
+            {
+                var comment = await commentRepository.GetByIdAsync(command.Id);
+                var authorizationResult = await authorizationService.AuthorizeAsync(user, comment, new UserIsOwnerRequirement());
+
+                if (!authorizationResult.Succeeded)
+                {
+                    return Results.Forbid();
+                }
+
+                var result = await handler.HandleAsync(command);
+                return result.ToHttpResult();
+            })
+            .Produces((int)HttpStatusCode.NoContent)
+            .Produces((int)HttpStatusCode.Unauthorized)
+            .Produces((int)HttpStatusCode.Forbidden)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization();
     }
 }

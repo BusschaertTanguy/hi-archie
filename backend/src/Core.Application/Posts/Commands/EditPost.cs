@@ -1,18 +1,15 @@
 ﻿using Common.Application.Commands;
 using Common.Application.Models;
-using Core.Domain.Communities.Repositories;
+using Core.Domain.Posts.Repositories;
 using FluentValidation;
 
-namespace Core.Application.Communities.Commands;
+namespace Core.Application.Posts.Commands;
 
-public static class EditCommunity
+public static class EditPost
 {
-    public sealed record Command(Guid Id, string Name) : ICommand;
+    public sealed record Command(Guid Id, string Title, string Content) : ICommand;
 
-    internal sealed class Handler(
-        IValidator<Command> validator,
-        IUnitOfWork unitOfWork,
-        ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -22,11 +19,12 @@ public static class EditCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var (id, name) = command;
+            var (id, title, content) = command;
 
-            var community = await communityRepository.GetByIdAsync(id);
+            var post = await postRepository.GetByIdAsync(id);
 
-            community.Name = name;
+            post.Title = title;
+            post.Content = content;
 
             await unitOfWork.CommitAsync();
 
@@ -41,9 +39,13 @@ public static class EditCommunity
             RuleFor(c => c.Id)
                 .NotEmpty();
 
-            RuleFor(c => c.Name)
+            RuleFor(c => c.Title)
                 .NotEmpty()
                 .MaximumLength(50);
+
+            RuleFor(x => x.Content)
+                .NotEmpty()
+                .MaximumLength(10_000);
         }
     }
 }

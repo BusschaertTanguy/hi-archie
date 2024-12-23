@@ -24,7 +24,12 @@ const Header = () => {
 
   return (
     <header className="flex justify-between p-6">
-      <span>Hi Archie!</span>
+      <span
+        className="hover:cursor-pointer"
+        onClick={() => navigate({ to: "/" })}
+      >
+        Hi Archie!
+      </span>
       <input
         className="w-96 rounded px-2 py-1 outline outline-1"
         placeholder="Search"

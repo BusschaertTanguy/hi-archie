@@ -21,7 +21,7 @@ internal sealed class EfSubscriptionRepository(AppDbContext dbContext) : ISubscr
         return await dbContext.Set<Subscription>().FindAsync(communityId, userId) ?? throw new InvalidOperationException("Subscription not found");
     }
 
-    public Task DeleteAsync(Subscription subscription)
+    public Task RemoveAsync(Subscription subscription)
     {
         dbContext.Set<Subscription>().Remove(subscription);
         return Task.CompletedTask;

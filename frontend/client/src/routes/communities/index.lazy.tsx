@@ -1,53 +1,31 @@
-import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  CommunitiesQueriesGetCommunitiesDto,
-  useGetApiV1Communities,
-} from "../../api/types";
-import { PlusIcon } from "@heroicons/react/24/solid";
-import Modal from "../../components/modal.tsx";
-import useDisclosure from "../../hooks/use-disclosure.ts";
+import { createLazyFileRoute, Link } from "@tanstack/react-router";
+import { useGetApiV1Communities } from "../../api/types";
 import Button from "../../components/button.tsx";
-import { useCallback, useState } from "react";
-import CommunityForm from "./-components/community-form.tsx";
 import useUser from "../../hooks/use-user.ts";
 
 const Communities = () => {
   const { userId } = useUser();
-  const navigate = useNavigate({ from: "/communities" });
+  const navigate = Route.useNavigate();
   const { pageIndex, pageSize, search } = Route.useSearch();
 
-  const [selectedCommunity, setSelectedCommunity] =
-    useState<CommunitiesQueriesGetCommunitiesDto>();
-
-  const {
-    isOpen,
-    handlers: { open, close },
-  } = useDisclosure();
-
-  const { data, refetch } = useGetApiV1Communities({
+  const { data } = useGetApiV1Communities({
     pageIndex,
     pageSize,
     name: search,
   });
 
-  const closeForm = useCallback(() => {
-    close();
-    setSelectedCommunity(undefined);
-  }, [close]);
-
   return (
     <>
       <div className="flex flex-1 flex-col gap-5">
-        <div className={`flex ${userId ? "justify-between" : "justify-end"}`}>
+        <div className="flex justify-between">
+          <div className="text-2xl">Communities</div>
           {userId && (
             <Button
               color="black"
               variant="filled"
-              className="flex items-center justify-center gap-0.5"
-              onClick={open}
+              onClick={() => navigate({ to: "/communities/add" })}
             >
-              <PlusIcon className="size-6" />
-              CREATE
+              ADD
             </Button>
           )}
         </div>
@@ -55,31 +33,16 @@ const Communities = () => {
           {data?.communities.map((c) => (
             <div
               key={c.id}
-              className="flex items-center justify-between rounded p-4 outline outline-1 outline-black"
+              className="flex items-center justify-between rounded p-4 outline outline-1 outline-black hover:cursor-pointer"
+              onClick={async () => {
+                await navigate({
+                  to: "/communities/$communityId",
+                  params: { communityId: c.id },
+                  search: { pageIndex: 0, pageSize: 25 },
+                });
+              }}
             >
-              <div
-                onClick={async () => {
-                  await navigate({
-                    to: "/communities/$communityId",
-                    params: { communityId: c.id },
-                    search: { pageIndex: 0, pageSize: 25 },
-                  });
-                }}
-              >
-                {c.name}
-              </div>
-              {userId === c.ownerId && (
-                <Button
-                  color={"black"}
-                  variant={"outlined"}
-                  onClick={() => {
-                    setSelectedCommunity(c);
-                    open();
-                  }}
-                >
-                  EDIT
-                </Button>
-              )}
+              {c.name}
             </div>
           ))}
         </div>
@@ -104,18 +67,6 @@ const Communities = () => {
           </Link>
         </div>
       </div>
-      {isOpen && (
-        <Modal onClose={closeForm}>
-          <CommunityForm
-            community={selectedCommunity}
-            onCancel={closeForm}
-            onSave={async () => {
-              closeForm();
-              await refetch();
-            }}
-          />
-        </Modal>
-      )}
     </>
   );
 };

@@ -19,11 +19,18 @@ import { Route as CommunitiesCommunityIdIndexImport } from './routes/communities
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute('/')()
+const CommunitiesAddIndexLazyImport = createFileRoute('/communities/add/')()
+const CommunitiesCommunityIdEditIndexLazyImport = createFileRoute(
+  '/communities/$communityId/edit/',
+)()
 const CommunitiesCommunityIdPostsAddIndexLazyImport = createFileRoute(
   '/communities/$communityId/posts/add/',
 )()
 const CommunitiesCommunityIdPostsPostIdIndexLazyImport = createFileRoute(
   '/communities/$communityId/posts/$postId/',
+)()
+const CommunitiesCommunityIdPostsPostIdEditIndexLazyImport = createFileRoute(
+  '/communities/$communityId/posts/$postId/edit/',
 )()
 
 // Create/Update Routes
@@ -42,6 +49,14 @@ const CommunitiesIndexRoute = CommunitiesIndexImport.update({
   import('./routes/communities/index.lazy').then((d) => d.Route),
 )
 
+const CommunitiesAddIndexLazyRoute = CommunitiesAddIndexLazyImport.update({
+  id: '/communities/add/',
+  path: '/communities/add/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/communities/add/index.lazy').then((d) => d.Route),
+)
+
 const CommunitiesCommunityIdIndexRoute =
   CommunitiesCommunityIdIndexImport.update({
     id: '/communities/$communityId/',
@@ -49,6 +64,17 @@ const CommunitiesCommunityIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./routes/communities/$communityId/index.lazy').then((d) => d.Route),
+  )
+
+const CommunitiesCommunityIdEditIndexLazyRoute =
+  CommunitiesCommunityIdEditIndexLazyImport.update({
+    id: '/communities/$communityId/edit/',
+    path: '/communities/$communityId/edit/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./routes/communities/$communityId/edit/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const CommunitiesCommunityIdPostsAddIndexLazyRoute =
@@ -71,6 +97,17 @@ const CommunitiesCommunityIdPostsPostIdIndexLazyRoute =
     import('./routes/communities/$communityId/posts/$postId/index.lazy').then(
       (d) => d.Route,
     ),
+  )
+
+const CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute =
+  CommunitiesCommunityIdPostsPostIdEditIndexLazyImport.update({
+    id: '/communities/$communityId/posts/$postId/edit/',
+    path: '/communities/$communityId/posts/$postId/edit/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/communities/$communityId/posts/$postId/edit/index.lazy'
+    ).then((d) => d.Route),
   )
 
 // Populate the FileRoutesByPath interface
@@ -98,6 +135,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesCommunityIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/communities/add/': {
+      id: '/communities/add/'
+      path: '/communities/add'
+      fullPath: '/communities/add'
+      preLoaderRoute: typeof CommunitiesAddIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/communities/$communityId/edit/': {
+      id: '/communities/$communityId/edit/'
+      path: '/communities/$communityId/edit'
+      fullPath: '/communities/$communityId/edit'
+      preLoaderRoute: typeof CommunitiesCommunityIdEditIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/communities/$communityId/posts/$postId/': {
       id: '/communities/$communityId/posts/$postId/'
       path: '/communities/$communityId/posts/$postId'
@@ -112,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunitiesCommunityIdPostsAddIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/communities/$communityId/posts/$postId/edit/': {
+      id: '/communities/$communityId/posts/$postId/edit/'
+      path: '/communities/$communityId/posts/$postId/edit'
+      fullPath: '/communities/$communityId/posts/$postId/edit'
+      preLoaderRoute: typeof CommunitiesCommunityIdPostsPostIdEditIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -121,16 +179,22 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/communities': typeof CommunitiesIndexRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdIndexRoute
+  '/communities/add': typeof CommunitiesAddIndexLazyRoute
+  '/communities/$communityId/edit': typeof CommunitiesCommunityIdEditIndexLazyRoute
   '/communities/$communityId/posts/$postId': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
   '/communities/$communityId/posts/add': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
+  '/communities/$communityId/posts/$postId/edit': typeof CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/communities': typeof CommunitiesIndexRoute
   '/communities/$communityId': typeof CommunitiesCommunityIdIndexRoute
+  '/communities/add': typeof CommunitiesAddIndexLazyRoute
+  '/communities/$communityId/edit': typeof CommunitiesCommunityIdEditIndexLazyRoute
   '/communities/$communityId/posts/$postId': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
   '/communities/$communityId/posts/add': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
+  '/communities/$communityId/posts/$postId/edit': typeof CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute
 }
 
 export interface FileRoutesById {
@@ -138,8 +202,11 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/communities/': typeof CommunitiesIndexRoute
   '/communities/$communityId/': typeof CommunitiesCommunityIdIndexRoute
+  '/communities/add/': typeof CommunitiesAddIndexLazyRoute
+  '/communities/$communityId/edit/': typeof CommunitiesCommunityIdEditIndexLazyRoute
   '/communities/$communityId/posts/$postId/': typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
   '/communities/$communityId/posts/add/': typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
+  '/communities/$communityId/posts/$postId/edit/': typeof CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -148,22 +215,31 @@ export interface FileRouteTypes {
     | '/'
     | '/communities'
     | '/communities/$communityId'
+    | '/communities/add'
+    | '/communities/$communityId/edit'
     | '/communities/$communityId/posts/$postId'
     | '/communities/$communityId/posts/add'
+    | '/communities/$communityId/posts/$postId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/communities'
     | '/communities/$communityId'
+    | '/communities/add'
+    | '/communities/$communityId/edit'
     | '/communities/$communityId/posts/$postId'
     | '/communities/$communityId/posts/add'
+    | '/communities/$communityId/posts/$postId/edit'
   id:
     | '__root__'
     | '/'
     | '/communities/'
     | '/communities/$communityId/'
+    | '/communities/add/'
+    | '/communities/$communityId/edit/'
     | '/communities/$communityId/posts/$postId/'
     | '/communities/$communityId/posts/add/'
+    | '/communities/$communityId/posts/$postId/edit/'
   fileRoutesById: FileRoutesById
 }
 
@@ -171,18 +247,26 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   CommunitiesIndexRoute: typeof CommunitiesIndexRoute
   CommunitiesCommunityIdIndexRoute: typeof CommunitiesCommunityIdIndexRoute
+  CommunitiesAddIndexLazyRoute: typeof CommunitiesAddIndexLazyRoute
+  CommunitiesCommunityIdEditIndexLazyRoute: typeof CommunitiesCommunityIdEditIndexLazyRoute
   CommunitiesCommunityIdPostsPostIdIndexLazyRoute: typeof CommunitiesCommunityIdPostsPostIdIndexLazyRoute
   CommunitiesCommunityIdPostsAddIndexLazyRoute: typeof CommunitiesCommunityIdPostsAddIndexLazyRoute
+  CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute: typeof CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   CommunitiesIndexRoute: CommunitiesIndexRoute,
   CommunitiesCommunityIdIndexRoute: CommunitiesCommunityIdIndexRoute,
+  CommunitiesAddIndexLazyRoute: CommunitiesAddIndexLazyRoute,
+  CommunitiesCommunityIdEditIndexLazyRoute:
+    CommunitiesCommunityIdEditIndexLazyRoute,
   CommunitiesCommunityIdPostsPostIdIndexLazyRoute:
     CommunitiesCommunityIdPostsPostIdIndexLazyRoute,
   CommunitiesCommunityIdPostsAddIndexLazyRoute:
     CommunitiesCommunityIdPostsAddIndexLazyRoute,
+  CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute:
+    CommunitiesCommunityIdPostsPostIdEditIndexLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -198,8 +282,11 @@ export const routeTree = rootRoute
         "/",
         "/communities/",
         "/communities/$communityId/",
+        "/communities/add/",
+        "/communities/$communityId/edit/",
         "/communities/$communityId/posts/$postId/",
-        "/communities/$communityId/posts/add/"
+        "/communities/$communityId/posts/add/",
+        "/communities/$communityId/posts/$postId/edit/"
       ]
     },
     "/": {
@@ -211,11 +298,20 @@ export const routeTree = rootRoute
     "/communities/$communityId/": {
       "filePath": "communities/$communityId/index.tsx"
     },
+    "/communities/add/": {
+      "filePath": "communities/add/index.lazy.tsx"
+    },
+    "/communities/$communityId/edit/": {
+      "filePath": "communities/$communityId/edit/index.lazy.tsx"
+    },
     "/communities/$communityId/posts/$postId/": {
       "filePath": "communities/$communityId/posts/$postId/index.lazy.tsx"
     },
     "/communities/$communityId/posts/add/": {
       "filePath": "communities/$communityId/posts/add/index.lazy.tsx"
+    },
+    "/communities/$communityId/posts/$postId/edit/": {
+      "filePath": "communities/$communityId/posts/$postId/edit/index.lazy.tsx"
     }
   }
 }
