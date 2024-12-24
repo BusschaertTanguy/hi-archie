@@ -20,6 +20,32 @@ import type {
 } from "@tanstack/react-query";
 import { axiosInstance } from "../mutator/axios-instance";
 import type { ErrorType, BodyType } from "../mutator/axios-instance";
+export type PostApiV1CommentsVote500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1CommentsVote400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
 export type PutApiV1Comments500 = {
   /** @nullable */
   detail?: string | null;
@@ -100,6 +126,32 @@ export type GetApiV1Comments400 = {
 
 export type GetApiV1CommentsParams = {
   postId: string;
+};
+
+export type PostApiV1PostsVote500 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
+};
+
+export type PostApiV1PostsVote400 = {
+  /** @nullable */
+  detail?: string | null;
+  /** @nullable */
+  instance?: string | null;
+  /** @nullable */
+  status?: number | null;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  type?: string | null;
 };
 
 export type DeleteApiV1PostsId500 = {
@@ -446,9 +498,11 @@ export interface UsersQueriesGetUserByExternalIdResponse {
 }
 
 export interface PostsQueriesGetPostsDto {
+  down: number;
   id: string;
   publishDate: string;
   title: string;
+  up: number;
 }
 
 export interface PostsQueriesGetPostsResponse {
@@ -458,10 +512,21 @@ export interface PostsQueriesGetPostsResponse {
 
 export interface PostsQueriesGetPostResponse {
   content: string;
+  down: number;
   id: string;
   ownerId: string;
   publishDate: string;
   title: string;
+  up: number;
+}
+
+export enum PostsEnumsPostVoteType {
+  Upvote = "Upvote",
+  Downvote = "Downvote",
+}
+export interface PostsCommandsVotePostCommand {
+  postId: string;
+  type: PostsEnumsPostVoteType;
 }
 
 export interface PostsCommandsEditPostCommand {
@@ -514,11 +579,22 @@ export interface CommunitiesCommandsAddCommunityCommand {
 
 export interface CommentsQueriesGetCommentsResponse {
   content: string;
+  down: number;
   id: string;
   ownerId: string;
   /** @nullable */
   parentId?: string | null;
   publishDate: string;
+  up: number;
+}
+
+export enum CommentsEnumsCommentVoteType {
+  Upvote = "Upvote",
+  Downvote = "Downvote",
+}
+export interface CommentsCommandsVoteCommentCommand {
+  commentId: string;
+  type: CommentsEnumsCommentVoteType;
 }
 
 export interface CommentsCommandsEditCommentCommand {
@@ -1849,6 +1925,85 @@ export const useDeleteApiV1PostsId = <
   return useMutation(mutationOptions);
 };
 
+export const postApiV1PostsVote = (
+  postsCommandsVotePostCommand: BodyType<PostsCommandsVotePostCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/posts/vote`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: postsCommandsVotePostCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1PostsVoteMutationOptions = <
+  TError = ErrorType<PostApiV1PostsVote400 | void | PostApiV1PostsVote500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1PostsVote>>,
+    TError,
+    { data: BodyType<PostsCommandsVotePostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1PostsVote>>,
+  TError,
+  { data: BodyType<PostsCommandsVotePostCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1PostsVote>>,
+    { data: BodyType<PostsCommandsVotePostCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1PostsVote(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1PostsVoteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1PostsVote>>
+>;
+export type PostApiV1PostsVoteMutationBody =
+  BodyType<PostsCommandsVotePostCommand>;
+export type PostApiV1PostsVoteMutationError = ErrorType<
+  PostApiV1PostsVote400 | void | PostApiV1PostsVote500
+>;
+
+export const usePostApiV1PostsVote = <
+  TError = ErrorType<PostApiV1PostsVote400 | void | PostApiV1PostsVote500>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1PostsVote>>,
+    TError,
+    { data: BodyType<PostsCommandsVotePostCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1PostsVote>>,
+  TError,
+  { data: BodyType<PostsCommandsVotePostCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1PostsVoteMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
 export const getApiV1Comments = (
   params: GetApiV1CommentsParams,
   options?: SecondParameter<typeof axiosInstance>,
@@ -2149,6 +2304,89 @@ export const usePutApiV1Comments = <
   TContext
 > => {
   const mutationOptions = getPutApiV1CommentsMutationOptions(options);
+
+  return useMutation(mutationOptions);
+};
+
+export const postApiV1CommentsVote = (
+  commentsCommandsVoteCommentCommand: BodyType<CommentsCommandsVoteCommentCommand>,
+  options?: SecondParameter<typeof axiosInstance>,
+  signal?: AbortSignal,
+) => {
+  return axiosInstance<void>(
+    {
+      url: `/api/v1/comments/vote`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: commentsCommandsVoteCommentCommand,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiV1CommentsVoteMutationOptions = <
+  TError = ErrorType<
+    PostApiV1CommentsVote400 | void | PostApiV1CommentsVote500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommentsVote>>,
+    TError,
+    { data: BodyType<CommentsCommandsVoteCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiV1CommentsVote>>,
+  TError,
+  { data: BodyType<CommentsCommandsVoteCommentCommand> },
+  TContext
+> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiV1CommentsVote>>,
+    { data: BodyType<CommentsCommandsVoteCommentCommand> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiV1CommentsVote(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiV1CommentsVoteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiV1CommentsVote>>
+>;
+export type PostApiV1CommentsVoteMutationBody =
+  BodyType<CommentsCommandsVoteCommentCommand>;
+export type PostApiV1CommentsVoteMutationError = ErrorType<
+  PostApiV1CommentsVote400 | void | PostApiV1CommentsVote500
+>;
+
+export const usePostApiV1CommentsVote = <
+  TError = ErrorType<
+    PostApiV1CommentsVote400 | void | PostApiV1CommentsVote500
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiV1CommentsVote>>,
+    TError,
+    { data: BodyType<CommentsCommandsVoteCommentCommand> },
+    TContext
+  >;
+  request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof postApiV1CommentsVote>>,
+  TError,
+  { data: BodyType<CommentsCommandsVoteCommentCommand> },
+  TContext
+> => {
+  const mutationOptions = getPostApiV1CommentsVoteMutationOptions(options);
 
   return useMutation(mutationOptions);
 };

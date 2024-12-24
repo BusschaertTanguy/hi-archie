@@ -1,6 +1,7 @@
 using Common.Application.Models;
 using Common.Application.Queries;
 using Core.Domain.Posts.Entities;
+using Core.Domain.Posts.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ public static class GetPosts
 {
     public sealed record Request(Guid CommunityId, int PageIndex, int PageSize, string? Title) : IQuery<Response>;
 
-    public sealed record Dto(Guid Id, string Title, DateTime PublishDate);
+    public sealed record Dto(Guid Id, string Title, DateTime PublishDate, long Up, long Down);
 
     public sealed record Response(List<Dto> Posts, long Total);
 
@@ -40,10 +41,12 @@ public static class GetPosts
                 .CountAsync();
 
             var posts = await postsQuery
-                .OrderByDescending(p => p.PublishDate)
+                .Include(p => p.Votes)
+                .OrderByDescending(p => p.Votes.Where(v => v.Type == PostVoteType.Upvote).Count() - p.Votes.Where(v => v.Type == PostVoteType.Downvote).Count())
+                .ThenByDescending(p => p.PublishDate)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
-                .Select(p => new Dto(p.Id, p.Title, p.PublishDate))
+                .Select(p => new Dto(p.Id, p.Title, p.PublishDate, p.Votes.Where(v => v.Type == PostVoteType.Upvote).Count(), p.Votes.Where(v => v.Type == PostVoteType.Downvote).Count()))
                 .ToListAsync();
 
             return Result<Response>.Success(new(posts, total));

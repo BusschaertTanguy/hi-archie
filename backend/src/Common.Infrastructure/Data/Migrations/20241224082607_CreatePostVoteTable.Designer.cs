@@ -3,6 +3,7 @@ using System;
 using Common.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Common.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241224082607_CreatePostVoteTable")]
+    partial class CreatePostVoteTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,29 +66,6 @@ namespace Common.Infrastructure.Data.Migrations
                         .HasDatabaseName("ix_comment_post_id");
 
                     b.ToTable("comment", (string)null);
-                });
-
-            modelBuilder.Entity("Core.Domain.Comments.Entities.CommentVote", b =>
-                {
-                    b.Property<Guid>("CommentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("comment_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
-
-                    b.HasKey("CommentId", "UserId")
-                        .HasName("pk_comment_vote");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_comment_vote_user_id");
-
-                    b.ToTable("comment_vote", (string)null);
                 });
 
             modelBuilder.Entity("Core.Domain.Communities.Entities.Community", b =>
@@ -241,23 +221,6 @@ namespace Common.Infrastructure.Data.Migrations
                         .HasConstraintName("fk_comment_post_post_id");
                 });
 
-            modelBuilder.Entity("Core.Domain.Comments.Entities.CommentVote", b =>
-                {
-                    b.HasOne("Core.Domain.Comments.Entities.Comment", null)
-                        .WithMany("Votes")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_comment_vote_comment_comment_id");
-
-                    b.HasOne("Core.Domain.Users.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_comment_vote_user_user_id");
-                });
-
             modelBuilder.Entity("Core.Domain.Communities.Entities.Community", b =>
                 {
                     b.HasOne("Core.Domain.Users.Entities.User", null)
@@ -317,11 +280,6 @@ namespace Common.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_post_vote_user_user_id");
-                });
-
-            modelBuilder.Entity("Core.Domain.Comments.Entities.Comment", b =>
-                {
-                    b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("Core.Domain.Posts.Entities.Post", b =>

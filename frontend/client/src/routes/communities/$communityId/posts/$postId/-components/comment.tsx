@@ -1,9 +1,13 @@
 import { memo } from "react";
 import Button from "../../../../../../components/button.tsx";
 import FormTextAreaInput from "../../../../../../components/form-text-area-input.tsx";
-import { CommentsQueriesGetCommentsResponse } from "../../../../../../api/types";
+import {
+  CommentsEnumsCommentVoteType,
+  CommentsQueriesGetCommentsResponse,
+} from "../../../../../../api/types";
 import { UseFormReturn } from "react-hook-form";
 import { CommentAction, CommentSchema } from "../index.lazy.tsx";
+import Voter from "../../../-components/voter.tsx";
 
 export interface CommentNode {
   readonly children?: CommentNode[];
@@ -17,6 +21,10 @@ interface CommentProps {
   readonly onSubmitComment: (data: CommentSchema) => Promise<void>;
   readonly onCancelComment: () => void;
   readonly onSelectComment: (commentAction: CommentAction) => void;
+  readonly onVote: (
+    commentId: string,
+    type: CommentsEnumsCommentVoteType,
+  ) => Promise<void>;
 }
 
 const Comment = ({
@@ -26,6 +34,7 @@ const Comment = ({
   onSubmitComment,
   onSelectComment,
   onCancelComment,
+  onVote,
 }: CommentProps) => {
   const {
     register,
@@ -46,6 +55,13 @@ const Comment = ({
         </div>
         <div>{comment.content}</div>
         <div className="flex gap-1.5">
+          <Voter
+            votes={comment.up - comment.down}
+            onUp={() => onVote(comment.id, CommentsEnumsCommentVoteType.Upvote)}
+            onDown={() =>
+              onVote(comment.id, CommentsEnumsCommentVoteType.Downvote)
+            }
+          />
           <span
             className="text-xs text-slate-500 hover:cursor-pointer hover:underline"
             onClick={() => {
@@ -115,6 +131,7 @@ const Comment = ({
             onSubmitComment={onSubmitComment}
             onCancelComment={onCancelComment}
             onSelectComment={onSelectComment}
+            onVote={onVote}
           />
         ))}
       </div>

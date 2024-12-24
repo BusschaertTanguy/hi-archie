@@ -1,13 +1,16 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
 import {
+  PostsEnumsPostVoteType,
   useDeleteApiV1CommunitiesId,
   useGetApiV1CommunitiesId,
   useGetApiV1Posts,
   usePostApiV1CommunitiesJoin,
   usePostApiV1CommunitiesLeave,
+  usePostApiV1PostsVote,
 } from "../../../api/types";
 import Button from "../../../components/button.tsx";
 import useUser from "../../../hooks/use-user.ts";
+import Voter from "./-components/voter.tsx";
 
 const Community = () => {
   const { userId, joinedCommunities, refresh } = useUser();
@@ -51,8 +54,14 @@ const Community = () => {
     },
   });
 
+  const voteMutation = usePostApiV1PostsVote({
+    mutation: {
+      onSuccess: () => postsQuery.refetch(),
+    },
+  });
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="text-2xl">{communityQuery.data?.name}</div>
         <div className="flex gap-2">
@@ -61,7 +70,6 @@ const Community = () => {
               <Button
                 color="black"
                 variant="filled"
-                className="flex items-center justify-center gap-0.5"
                 onClick={() =>
                   navigate({
                     to: "/communities/$communityId/posts/add",
@@ -74,7 +82,6 @@ const Community = () => {
               <Button
                 color="black"
                 variant="outlined"
-                className="flex items-center justify-center gap-0.5"
                 onClick={() =>
                   leaveMutation.mutateAsync({
                     data: {
@@ -91,7 +98,6 @@ const Community = () => {
             <Button
               color="black"
               variant="filled"
-              className="flex items-center justify-center gap-0.5"
               onClick={() =>
                 joinMutation.mutateAsync({
                   data: {
@@ -108,7 +114,6 @@ const Community = () => {
               <Button
                 color="blue"
                 variant="filled"
-                className="flex items-center justify-center gap-0.5"
                 onClick={() =>
                   navigate({
                     to: "/communities/$communityId/edit",
@@ -121,7 +126,6 @@ const Community = () => {
               <Button
                 color="red"
                 variant="filled"
-                className="flex items-center justify-center gap-0.5"
                 onClick={() => deleteMutation.mutateAsync({ id: communityId })}
               >
                 REMOVE
@@ -134,22 +138,50 @@ const Community = () => {
         {postsQuery.data?.posts.map((post) => (
           <div
             key={post.id}
-            className="rounded p-4 outline outline-1 outline-black hover:cursor-pointer"
-            onClick={() =>
-              navigate({
-                to: "/communities/$communityId/posts/$postId",
-                params: {
-                  communityId,
-                  postId: post.id,
-                },
-              })
-            }
+            className="flex items-center justify-between rounded p-4 outline outline-1 outline-black"
           >
-            {post.title}
+            <div className="flex items-center gap-4">
+              <div
+                className="text-lg hover:cursor-pointer"
+                onClick={() =>
+                  navigate({
+                    to: "/communities/$communityId/posts/$postId",
+                    params: {
+                      communityId,
+                      postId: post.id,
+                    },
+                  })
+                }
+              >
+                {post.title}
+              </div>
+              <div className="text-xs">
+                {new Date(post.publishDate).toLocaleString()}
+              </div>
+            </div>
+            <Voter
+              votes={post.up - post.down}
+              onUp={() =>
+                voteMutation.mutateAsync({
+                  data: {
+                    postId: post.id,
+                    type: PostsEnumsPostVoteType.Upvote,
+                  },
+                })
+              }
+              onDown={() =>
+                voteMutation.mutateAsync({
+                  data: {
+                    postId: post.id,
+                    type: PostsEnumsPostVoteType.Downvote,
+                  },
+                })
+              }
+            />
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-end gap-4">
+      <div className="flex items-center justify-end gap-2">
         <Link
           className="rounded px-3 py-1 text-black outline outline-1 outline-black"
           from="/communities/$communityId"

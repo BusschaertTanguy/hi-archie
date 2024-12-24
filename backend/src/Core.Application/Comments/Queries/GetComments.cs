@@ -1,6 +1,7 @@
 ﻿using Common.Application.Models;
 using Common.Application.Queries;
 using Core.Domain.Comments.Entities;
+using Core.Domain.Comments.Enums;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ public static class GetComments
 {
     public sealed record Request(Guid PostId) : IQuery<List<Response>>;
 
-    public sealed record Response(Guid Id, string Content, DateTime PublishDate, Guid OwnerId, Guid? ParentId);
+    public sealed record Response(Guid Id, string Content, DateTime PublishDate, Guid OwnerId, Guid? ParentId, long Up, long Down);
 
     internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor) : IQueryHandler<Request, List<Response>>
     {
@@ -23,9 +24,19 @@ public static class GetComments
             }
 
             var comments = await queryProcessor.Query<Comment>()
-                .OrderByDescending(c => c.PublishDate)
+                .Include(c => c.Votes)
+                .OrderByDescending(p => p.Votes.Where(v => v.Type == CommentVoteType.Upvote).Count() - p.Votes.Where(v => v.Type == CommentVoteType.Downvote).Count())
+                .ThenByDescending(c => c.PublishDate)
                 .Where(c => c.PostId == request.PostId)
-                .Select(c => new Response(c.Id, c.Content, c.PublishDate, c.OwnerId, c.ParentId))
+                .Select(c => new Response(
+                    c.Id,
+                    c.Content,
+                    c.PublishDate,
+                    c.OwnerId,
+                    c.ParentId,
+                    c.Votes.Where(v => v.Type == CommentVoteType.Upvote).LongCount(),
+                    c.Votes.Where(v => v.Type == CommentVoteType.Downvote).LongCount()
+                ))
                 .ToListAsync();
 
             return Result<List<Response>>.Success(comments);

@@ -1,11 +1,14 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import {
   CommentsQueriesGetCommentsResponse,
+  PostsEnumsPostVoteType,
   useDeleteApiV1PostsId,
   useGetApiV1Comments,
   useGetApiV1CommunitiesId,
   useGetApiV1PostsId,
   usePostApiV1Comments,
+  usePostApiV1CommentsVote,
+  usePostApiV1PostsVote,
   usePutApiV1Comments,
 } from "../../../../../api/types";
 import FormTextAreaInput from "../../../../../components/form-text-area-input.tsx";
@@ -17,6 +20,7 @@ import useDisclosure from "../../../../../hooks/use-disclosure.ts";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Comment, { CommentNode } from "./-components/comment.tsx";
 import useUser from "../../../../../hooks/use-user.ts";
+import Voter from "../../-components/voter.tsx";
 
 const schema = z.object({
   content: z.string().min(1).max(10000),
@@ -70,39 +74,29 @@ const Post = () => {
 
   const commentsQuery = useGetApiV1Comments({ postId });
 
+  const onPostFormSuccess = useCallback(async () => {
+    await commentsQuery.refetch();
+
+    if (isOpen) {
+      toggle();
+    }
+
+    if (commentAction) {
+      setCommentAction(undefined);
+    }
+
+    reset();
+  }, [commentAction, commentsQuery, isOpen, reset, toggle]);
+
   const addCommentMutation = usePostApiV1Comments({
     mutation: {
-      onSuccess: async () => {
-        await commentsQuery.refetch();
-
-        if (isOpen) {
-          toggle();
-        }
-
-        if (commentAction) {
-          setCommentAction(undefined);
-        }
-
-        reset();
-      },
+      onSuccess: onPostFormSuccess,
     },
   });
 
   const editCommentMutation = usePutApiV1Comments({
     mutation: {
-      onSuccess: async () => {
-        await commentsQuery.refetch();
-
-        if (isOpen) {
-          toggle();
-        }
-
-        if (commentAction) {
-          setCommentAction(undefined);
-        }
-
-        reset();
-      },
+      onSuccess: onPostFormSuccess,
     },
   });
 
@@ -114,6 +108,18 @@ const Post = () => {
           params: { communityId },
           search: { pageIndex: 0, pageSize: 25 },
         }),
+    },
+  });
+
+  const votePostMutation = usePostApiV1PostsVote({
+    mutation: {
+      onSuccess: () => postQuery.refetch(),
+    },
+  });
+
+  const voteCommentMutation = usePostApiV1CommentsVote({
+    mutation: {
+      onSuccess: () => commentsQuery.refetch(),
     },
   });
 
@@ -183,61 +189,85 @@ const Post = () => {
   }, [commentAction, setValue]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <div
-            className="text-sm hover:cursor-pointer"
-            onClick={() =>
-              navigate({
-                to: "/communities/$communityId",
-                params: { communityId },
-                search: { pageIndex: 0, pageSize: 25 },
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <div
+          className="text-sm hover:cursor-pointer"
+          onClick={() =>
+            navigate({
+              to: "/communities/$communityId",
+              params: { communityId },
+              search: { pageIndex: 0, pageSize: 25 },
+            })
+          }
+        >
+          {communityQuery.data?.name}
+        </div>
+        <div className="flex justify-between">
+          <div className="text-2xl">{postQuery.data?.title}</div>
+          <div className="flex gap-2">
+            {userId && (
+              <Button color="black" variant="filled" onClick={toggle}>
+                COMMENT
+              </Button>
+            )}
+            {userId && postQuery.data?.ownerId === userId && (
+              <>
+                <Button
+                  color="blue"
+                  variant="filled"
+                  onClick={() =>
+                    navigate({
+                      to: "/communities/$communityId/posts/$postId/edit",
+                      params: { communityId, postId },
+                    })
+                  }
+                >
+                  EDIT
+                </Button>
+                <Button
+                  color="red"
+                  variant="filled"
+                  onClick={() => removeMutation.mutateAsync({ id: postId })}
+                >
+                  REMOVE
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Voter
+            votes={(postQuery.data?.up ?? 0) - (postQuery.data?.down ?? 0)}
+            onUp={() =>
+              votePostMutation.mutateAsync({
+                data: {
+                  postId: postQuery.data?.id ?? "",
+                  type: PostsEnumsPostVoteType.Upvote,
+                },
               })
             }
-          >
-            {communityQuery.data?.name}
-          </div>
-          <div className="text-2xl">{postQuery.data?.title}</div>
+            onDown={() =>
+              votePostMutation.mutateAsync({
+                data: {
+                  postId: postQuery.data?.id ?? "",
+                  type: PostsEnumsPostVoteType.Downvote,
+                },
+              })
+            }
+          />
           <div className="text-xs">
             {new Date(postQuery.data?.publishDate ?? "").toLocaleString()}
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button color="black" variant="filled" onClick={toggle}>
-            COMMENT
-          </Button>
-          {userId && postQuery.data?.ownerId === userId && (
-            <>
-              <Button
-                color="blue"
-                variant="filled"
-                onClick={() =>
-                  navigate({
-                    to: "/communities/$communityId/posts/$postId/edit",
-                    params: { communityId, postId },
-                  })
-                }
-              >
-                EDIT
-              </Button>
-              <Button
-                color="red"
-                variant="filled"
-                onClick={() => removeMutation.mutateAsync({ id: postId })}
-              >
-                REMOVE
-              </Button>
-            </>
-          )}
-        </div>
       </div>
-      <div className="rounded border border-black p-3">
+      <div className="rounded border border-black p-4">
         {postQuery.data?.content}
       </div>
+
       {isOpen && (
         <form
-          className="flex flex-col gap-6"
+          className="flex flex-col gap-4"
           onSubmit={handleSubmit(onSubmitComment)}
         >
           <FormTextAreaInput
@@ -248,7 +278,7 @@ const Post = () => {
             error={errors.content}
             {...register("content")}
           />
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center justify-end gap-2">
             <Button
               type="button"
               color="black"
@@ -276,6 +306,9 @@ const Post = () => {
             onSubmitComment={onSubmitComment}
             onCancelComment={onCancelComment}
             onSelectComment={onSelectComment}
+            onVote={(commentId, type) =>
+              voteCommentMutation.mutateAsync({ data: { commentId, type } })
+            }
           />
         ))}
       </div>

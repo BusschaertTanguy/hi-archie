@@ -4,7 +4,7 @@ import {
   usePutApiV1Posts,
 } from "../../../../../../api/types";
 import { useCallback } from "react";
-import PostForm from "../../-components/post-form.tsx";
+import PostForm from "../../../-components/post-form.tsx";
 
 const EditPost = () => {
   const { communityId, postId } = Route.useParams();

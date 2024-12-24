@@ -36,7 +36,7 @@ const CommunityForm = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="text-xl">{community ? "Edit" : "Add"} Community</div>
+      <div className="text-2xl">{community ? "Edit" : "Add"} Community</div>
       <form id="add-community-form" onSubmit={handleSubmit(onSubmit)}>
         <FormTextInput
           label="Name"
@@ -45,7 +45,7 @@ const CommunityForm = ({
           {...register("name")}
         />
       </form>
-      <div className="flex justify-end gap-4">
+      <div className="flex justify-end gap-2">
         <Button variant="outlined" color="black" onClick={onCancel}>
           Cancel
         </Button>

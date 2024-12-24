@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Serialization;
 using Common.Infrastructure.Data.Extensions;
 using Core.Application.Extensions;
 using Host.WebApi.Handlers;
@@ -6,6 +7,7 @@ using Host.WebApi.Routes;
 using Host.WebApi.Transformers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -28,6 +30,9 @@ builder.Services
     .AddCommonInfrastructureData(connectionString)
     .AddCoreApplication();
 
+builder.Services.ConfigureHttpJsonOptions(options => { options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+builder.Services.Configure<JsonOptions>(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+
 builder.Services.AddCors(options => options.AddPolicy("ClientPolicy",
     policyBuilder => policyBuilder.WithOrigins(clientUrl).AllowAnyHeader().AllowAnyMethod()));
 
@@ -37,7 +42,7 @@ if (builder.Environment.IsDevelopment())
     {
         options.CreateSchemaReferenceId = info =>
         {
-            string[] assemblyNames = ["Core.Application."];
+            string[] assemblyNames = ["Core.Application.", "Core.Domain."];
             var fullName = info.Type.FullName?.Replace("+", ".") ?? string.Empty;
 
             return assemblyNames

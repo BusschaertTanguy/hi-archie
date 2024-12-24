@@ -1,11 +1,11 @@
 import { memo } from "react";
-import { PostsQueriesGetPostResponse } from "../../../../../api/types";
+import { PostsQueriesGetPostResponse } from "../../../../api/types";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormTextInput from "../../../../../components/form-text-input.tsx";
-import FormTextAreaInput from "../../../../../components/form-text-area-input.tsx";
-import Button from "../../../../../components/button.tsx";
+import FormTextInput from "../../../../components/form-text-input.tsx";
+import FormTextAreaInput from "../../../../components/form-text-area-input.tsx";
+import Button from "../../../../components/button.tsx";
 
 interface PostFormProps {
   readonly post?: PostsQueriesGetPostResponse;
@@ -34,8 +34,8 @@ const PostForm = ({ post, onCancel, onSubmit }: PostFormProps) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="text-xl">{post ? "Edit" : "Add"} Post</div>
-      <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+      <div className="text-2xl">{post ? "Edit" : "Add"} Post</div>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
         <FormTextInput
           label="Title"
           error={errors.title}
@@ -49,7 +49,7 @@ const PostForm = ({ post, onCancel, onSubmit }: PostFormProps) => {
           error={errors.content}
           {...register("content")}
         />
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-2">
           <Button
             color={"black"}
             variant={"outlined"}

@@ -8,4 +8,6 @@ public sealed class Post
     public required string Content { get; set; }
     public required DateTime PublishDate { get; init; }
     public required Guid OwnerId { get; init; }
+
+    public IEnumerable<PostVote> Votes { get; } = [];
 }

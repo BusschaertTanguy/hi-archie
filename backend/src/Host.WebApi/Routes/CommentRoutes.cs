@@ -66,5 +66,17 @@ public static class CommentRoutes
             .Produces((int)HttpStatusCode.Forbidden)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .RequireAuthorization();
+
+        group
+            .MapPost("vote", async ([FromServices] ICommandHandler<VoteComment.Command> handler, [FromBody] VoteComment.Command command) =>
+            {
+                var result = await handler.HandleAsync(command);
+                return result.ToHttpResult();
+            })
+            .Produces((int)HttpStatusCode.NoContent)
+            .Produces((int)HttpStatusCode.Unauthorized)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization()
+            .RequireUser();
     }
 }

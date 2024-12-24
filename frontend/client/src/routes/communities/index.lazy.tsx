@@ -16,8 +16,8 @@ const Communities = () => {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-5">
-        <div className="flex justify-between">
+      <div className="flex flex-1 flex-col gap-6">
+        <div className="flex items-center justify-between">
           <div className="text-2xl">Communities</div>
           {userId && (
             <Button
@@ -33,7 +33,7 @@ const Communities = () => {
           {data?.communities.map((c) => (
             <div
               key={c.id}
-              className="flex items-center justify-between rounded p-4 outline outline-1 outline-black hover:cursor-pointer"
+              className="flex items-center justify-between rounded p-4 text-lg outline outline-1 outline-black hover:cursor-pointer"
               onClick={async () => {
                 await navigate({
                   to: "/communities/$communityId",
@@ -46,7 +46,7 @@ const Communities = () => {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-2">
           <Link
             className="rounded px-3 py-1 text-black outline outline-1 outline-black"
             from="/communities"

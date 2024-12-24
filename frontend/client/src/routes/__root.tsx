@@ -16,9 +16,9 @@ const Root = () => (
   <>
     <div className="flex h-full flex-col divide-y">
       <Header />
-      <div className="flex flex-1 divide-x">
+      <div className="flex divide-x">
         <SideNav />
-        <main className="flex flex-1 flex-col items-center">
+        <main className="flex h-[calc(100vh-56px-1.5rem)] flex-1 flex-col items-center overflow-y-auto">
           <div className="-ml-32 w-1/2 p-6">
             <Outlet />
           </div>

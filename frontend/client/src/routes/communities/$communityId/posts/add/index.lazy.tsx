@@ -2,7 +2,7 @@ import { createLazyFileRoute, Navigate } from "@tanstack/react-router";
 import { usePostApiV1Posts } from "../../../../../api/types";
 import useUser from "../../../../../hooks/use-user.ts";
 import { useCallback } from "react";
-import PostForm from "../-components/post-form.tsx";
+import PostForm from "../../-components/post-form.tsx";
 
 const AddPost = () => {
   const { joinedCommunities } = useUser();
