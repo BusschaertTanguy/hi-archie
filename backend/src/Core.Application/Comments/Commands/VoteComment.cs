@@ -45,31 +45,32 @@ public static class VoteComment
                     UpChange = vote.Type == CommentVoteType.Upvote ? 1 : 0,
                     DownChange = vote.Type == CommentVoteType.Downvote ? 1 : 0
                 });
+                
+                return Result.Success();
             }
-            else
+            
+            if (vote.Type == command.Type)
             {
-                if (vote.Type == command.Type)
+                await commentVoteRepository.RemoveAsync(vote.CommentId, command.UserId);
+                await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
                 {
-                    await commentVoteRepository.RemoveAsync(vote.CommentId, command.UserId);
-                    await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
-                    {
-                        Id = vote.CommentId,
-                        UpChange = vote.Type == CommentVoteType.Upvote ? -1 : 0,
-                        DownChange = vote.Type == CommentVoteType.Downvote ? -1 : 0
-                    });
-                }
-                else
-                {
-                    vote.Type = command.Type;
-                    await commentVoteRepository.UpdateAsync(vote);
-                    await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
-                    {
-                        Id = vote.CommentId,
-                        UpChange = vote.Type == CommentVoteType.Upvote ? 1 : -1,
-                        DownChange = vote.Type == CommentVoteType.Downvote ? 1 : -1
-                    });
-                }
+                    Id = vote.CommentId,
+                    UpChange = vote.Type == CommentVoteType.Upvote ? -1 : 0,
+                    DownChange = vote.Type == CommentVoteType.Downvote ? -1 : 0
+                });
+                
+                return Result.Success();
             }
+            
+            vote.Type = command.Type;
+            
+            await commentVoteRepository.UpdateAsync(vote);
+            await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+            {
+                Id = vote.CommentId,
+                UpChange = vote.Type == CommentVoteType.Upvote ? 1 : -1,
+                DownChange = vote.Type == CommentVoteType.Downvote ? 1 : -1
+            });
 
             return Result.Success();
         }
