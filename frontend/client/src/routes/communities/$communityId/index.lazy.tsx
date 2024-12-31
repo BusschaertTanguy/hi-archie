@@ -177,6 +177,7 @@ const Community = () => {
                   },
                 })
               }
+              selectedType={post.currentVote}
             />
           </div>
         ))}

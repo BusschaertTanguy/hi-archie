@@ -5,7 +5,7 @@ namespace Core.Domain.Communities.Repositories;
 public interface ISubscriptionRepository
 {
     Task<bool> ExistsAsync(Guid communityId, Guid userId);
-    Task AddAsync(Subscription subscription);
     Task<Subscription> GetByIdAsync(Guid communityId, Guid userId);
-    Task RemoveAsync(Subscription subscription);
+    Task AddAsync(Subscription subscription);
+    Task RemoveAsync(Guid communityId, Guid userId);
 }

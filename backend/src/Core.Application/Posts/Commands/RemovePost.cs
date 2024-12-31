@@ -1,5 +1,7 @@
 ﻿using Common.Application.Commands;
 using Common.Application.Models;
+using Common.Application.Queues;
+using Core.Application.Posts.Events;
 using Core.Domain.Posts.Repositories;
 using FluentValidation;
 
@@ -9,7 +11,7 @@ public static class RemovePost
 {
     public sealed record Command(Guid Id) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IPostRepository postRepository, IAsyncQueue asyncQueue) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -19,9 +21,11 @@ public static class RemovePost
                 return Result.Failure("validation-failed");
             }
 
-            var post = await postRepository.GetByIdAsync(command.Id);
-            await postRepository.RemoveAsync(post);
-            await unitOfWork.CommitAsync();
+            await postRepository.RemoveAsync(command.Id);
+            await asyncQueue.PublishAsync(PostRemoved.QueueName, new PostRemoved
+            {
+                Id = command.Id
+            });
 
             return Result.Success();
         }

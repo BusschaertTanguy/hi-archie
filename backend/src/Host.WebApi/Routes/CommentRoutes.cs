@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Common.Application.Commands;
 using Common.Application.Queries;
 using Core.Application.Comments.Commands;
+using Core.Application.Comments.Projections;
 using Core.Application.Comments.Queries;
 using Core.Domain.Comments.Repositories;
 using Host.WebApi.Extensions;
@@ -20,13 +21,30 @@ public static class CommentRoutes
             .WithTags("Comments");
 
         group
-            .MapGet("", async ([FromServices] IQueryHandler<GetComments.Request, List<GetComments.Response>> handler, [FromQuery] Guid postId) =>
+            .MapGet("", async ([FromServices] IQueryHandler<GetComments.Request, List<CommentProjection>> handler, [FromQuery] Guid postId) =>
             {
                 var result = await handler.HandleAsync(new(postId));
                 return result.ToHttpResult();
             })
-            .Produces<List<GetComments.Response>>()
+            .Produces<List<CommentProjection>>()
             .ProducesProblem((int)HttpStatusCode.BadRequest);
+
+        group
+            .MapGet("votes", async (HttpContext httpContext, [FromServices] IQueryHandler<GetCommentVotes.Request, List<GetCommentVotes.Response>> handler, [FromQuery] Guid postId) =>
+            {
+                var userId = await httpContext.GetUserId();
+                if (!userId.HasValue)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await handler.HandleAsync(new(postId, userId.Value));
+                return result.ToHttpResult();
+            })
+            .Produces<List<GetCommentVotes.Response>>()
+            .ProducesProblem((int)HttpStatusCode.Unauthorized)
+            .ProducesProblem((int)HttpStatusCode.BadRequest)
+            .RequireAuthorization();
 
         group
             .MapPost("",

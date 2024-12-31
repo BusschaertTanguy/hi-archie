@@ -14,7 +14,7 @@ public static class LeaveCommunity
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -24,9 +24,7 @@ public static class LeaveCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var subscription = await subscriptionRepository.GetByIdAsync(command.CommunityId, command.UserId);
-            await subscriptionRepository.RemoveAsync(subscription);
-            await unitOfWork.CommitAsync();
+            await subscriptionRepository.RemoveAsync(command.CommunityId, command.UserId);
 
             return Result.Success();
         }

@@ -9,7 +9,7 @@ public static class RemoveCommunity
 {
     public sealed record Command(Guid Id) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -19,9 +19,7 @@ public static class RemoveCommunity
                 return Result.Failure("validation-failed");
             }
 
-            var community = await communityRepository.GetByIdAsync(command.Id);
-            await communityRepository.RemoveAsync(community);
-            await unitOfWork.CommitAsync();
+            await communityRepository.RemoveAsync(command.Id);
 
             return Result.Success();
         }

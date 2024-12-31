@@ -7,5 +7,6 @@ public interface ICommentVoteRepository
 {
     Task<CommentVote?> GetByIdAsync(Guid commentId, Guid userId);
     Task AddAsync(CommentVote vote);
-    Task RemoveAsync(CommentVote vote);
+    Task UpdateAsync(CommentVote vote);
+    Task RemoveAsync(Guid commentId, Guid userId);
 }

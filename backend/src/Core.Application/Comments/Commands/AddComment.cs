@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Common.Application.Commands;
 using Common.Application.Models;
+using Common.Application.Queues;
+using Core.Application.Comments.Events;
 using Core.Domain.Comments.Entities;
 using Core.Domain.Comments.Repositories;
 using FluentValidation;
@@ -9,13 +11,13 @@ namespace Core.Application.Comments.Commands;
 
 public static class AddComment
 {
-    public sealed record Command(Guid Id, string Content, Guid PostId, Guid? ParentId) : ICommand, IRequiredUser
+    public sealed record Command(Guid Id, string Content, Guid PostId, DateTime PublishDate, Guid? ParentId) : ICommand, IRequiredUser
     {
         [JsonIgnore]
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommentRepository commentRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ICommentRepository commentRepository, IAsyncQueue asyncQueue) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -25,7 +27,7 @@ public static class AddComment
                 return Result.Failure("validation-failed");
             }
 
-            var (id, content, postId, parentId) = command;
+            var (id, content, postId, publishDate, parentId) = command;
 
             var comment = new Comment
             {
@@ -33,12 +35,12 @@ public static class AddComment
                 Content = content,
                 PostId = postId,
                 OwnerId = command.UserId,
-                PublishDate = DateTime.UtcNow,
+                PublishDate = publishDate,
                 ParentId = parentId
             };
 
             await commentRepository.AddAsync(comment);
-            await unitOfWork.CommitAsync();
+            await asyncQueue.PublishAsync(CommentAdded.QueueName, new CommentAdded { Id = comment.Id });
 
             return Result.Success();
         }

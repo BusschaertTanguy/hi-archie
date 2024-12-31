@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Common.Application.Commands;
 using Common.Application.Models;
+using Common.Application.Queues;
+using Core.Application.Comments.Events;
 using Core.Domain.Comments.Enums;
 using Core.Domain.Comments.Repositories;
 using FluentValidation;
@@ -15,7 +17,7 @@ public static class VoteComment
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommentVoteRepository commentVoteRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ICommentVoteRepository commentVoteRepository, IAsyncQueue asyncQueue) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -37,20 +39,37 @@ public static class VoteComment
                 };
 
                 await commentVoteRepository.AddAsync(vote);
+                await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+                {
+                    Id = vote.CommentId,
+                    UpChange = vote.Type == CommentVoteType.Upvote ? 1 : 0,
+                    DownChange = vote.Type == CommentVoteType.Downvote ? 1 : 0
+                });
             }
             else
             {
                 if (vote.Type == command.Type)
                 {
-                    await commentVoteRepository.RemoveAsync(vote);
+                    await commentVoteRepository.RemoveAsync(vote.CommentId, command.UserId);
+                    await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+                    {
+                        Id = vote.CommentId,
+                        UpChange = vote.Type == CommentVoteType.Upvote ? -1 : 0,
+                        DownChange = vote.Type == CommentVoteType.Downvote ? -1 : 0
+                    });
                 }
                 else
                 {
                     vote.Type = command.Type;
+                    await commentVoteRepository.UpdateAsync(vote);
+                    await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+                    {
+                        Id = vote.CommentId,
+                        UpChange = vote.Type == CommentVoteType.Upvote ? 1 : -1,
+                        DownChange = vote.Type == CommentVoteType.Downvote ? 1 : -1
+                    });
                 }
             }
-
-            await unitOfWork.CommitAsync();
 
             return Result.Success();
         }

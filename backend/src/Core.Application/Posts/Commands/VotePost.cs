@@ -15,7 +15,7 @@ public static class VotePost
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostVoteRepository postVoteRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IPostVoteRepository postVoteRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -42,15 +42,14 @@ public static class VotePost
             {
                 if (vote.Type == command.Type)
                 {
-                    await postVoteRepository.RemoveAsync(vote);
+                    await postVoteRepository.RemoveAsync(vote.PostId, vote.UserId);
                 }
                 else
                 {
                     vote.Type = command.Type;
+                    await postVoteRepository.UpdateAsync(vote);
                 }
             }
-
-            await unitOfWork.CommitAsync();
 
             return Result.Success();
         }

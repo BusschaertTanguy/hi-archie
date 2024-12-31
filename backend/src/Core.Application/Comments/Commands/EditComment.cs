@@ -1,5 +1,7 @@
 ﻿using Common.Application.Commands;
 using Common.Application.Models;
+using Common.Application.Queues;
+using Core.Application.Comments.Events;
 using Core.Domain.Comments.Repositories;
 using FluentValidation;
 
@@ -9,7 +11,7 @@ public static class EditComment
 {
     public sealed record Command(Guid Id, string Content) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ICommentRepository commentRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ICommentRepository commentRepository, IAsyncQueue asyncQueue) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -25,7 +27,8 @@ public static class EditComment
 
             comment.Content = content;
 
-            await unitOfWork.CommitAsync();
+            await commentRepository.UpdateAsync(comment);
+            await asyncQueue.PublishAsync(CommentEdited.QueueName, new CommentEdited { Id = comment.Id });
 
             return Result.Success();
         }

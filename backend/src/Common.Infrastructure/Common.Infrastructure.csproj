@@ -8,16 +8,19 @@
 
     <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="9.0.0"/>
+        <PackageReference Include="Neo4j.Driver" Version="5.27.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1"/>
+        <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Common.Application\Common.Application.csproj"/>
+        <ProjectReference Include="..\Core.Application\Core.Application.csproj" />
         <ProjectReference Include="..\Core.Domain\Core.Domain.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Data\Migrations\"/>
+        <Folder Include="EntityFramework\Migrations\" />
     </ItemGroup>
 
 </Project>

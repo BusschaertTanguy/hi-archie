@@ -20,20 +20,23 @@ public static class PostRoutes
             .WithTags("Posts");
 
         group
-            .MapGet("", async ([FromServices] IQueryHandler<GetPosts.Request, GetPosts.Response> handler, [FromQuery] Guid communityId, [FromQuery] int pageIndex, [FromQuery] int pageSize,
+            .MapGet("", async (HttpContext httpContext, [FromServices] IQueryHandler<GetPosts.Request, GetPosts.Response> handler, [FromQuery] Guid communityId, [FromQuery] int pageIndex,
+                [FromQuery] int pageSize,
                 [FromQuery] string? title) =>
             {
-                var result = await handler.HandleAsync(new(communityId, pageIndex, pageSize, title));
+                var userId = await httpContext.GetUserId();
+                var result = await handler.HandleAsync(new(communityId, pageIndex, pageSize, title, userId));
                 return result.ToHttpResult();
             })
             .Produces<GetPosts.Response>()
             .ProducesProblem((int)HttpStatusCode.BadRequest);
 
         group
-            .MapGet("{id:guid}", async ([FromServices] IQueryHandler<GetPost.Request, GetPost.Response> handler,
+            .MapGet("{id:guid}", async (HttpContext httpContext, [FromServices] IQueryHandler<GetPost.Request, GetPost.Response> handler,
                 [FromRoute] Guid id) =>
             {
-                var result = await handler.HandleAsync(new(id));
+                var userId = await httpContext.GetUserId();
+                var result = await handler.HandleAsync(new(id, userId));
                 return result.ToHttpResult();
             })
             .Produces<GetPost.Response>()

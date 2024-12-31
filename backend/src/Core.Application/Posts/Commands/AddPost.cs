@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Common.Application.Commands;
 using Common.Application.Models;
+using Common.Application.Queues;
+using Core.Application.Posts.Events;
 using Core.Domain.Communities.Repositories;
 using Core.Domain.Posts.Entities;
 using Core.Domain.Posts.Repositories;
@@ -16,7 +18,7 @@ public static class AddPost
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IPostRepository postRepository, ISubscriptionRepository subscriptionRepository, IAsyncQueue asyncQueue) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -45,7 +47,7 @@ public static class AddPost
             };
 
             await postRepository.AddAsync(post);
-            await unitOfWork.CommitAsync();
+            await asyncQueue.PublishAsync(PostAdded.QueueName, new PostAdded { Id = post.Id });
 
             return Result.Success();
         }

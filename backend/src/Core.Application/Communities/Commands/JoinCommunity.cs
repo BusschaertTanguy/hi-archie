@@ -15,7 +15,7 @@ public static class JoinCommunity
         public Guid UserId { get; init; }
     }
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ISubscriptionRepository subscriptionRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -38,7 +38,6 @@ public static class JoinCommunity
             };
 
             await subscriptionRepository.AddAsync(subscription);
-            await unitOfWork.CommitAsync();
 
             return Result.Success();
         }

@@ -10,7 +10,12 @@ public static class GetCommunity
 {
     public sealed record Request(Guid Id) : IQuery<Response>;
 
-    public sealed record Response(Guid Id, string Name, Guid OwnerId);
+    public sealed class Response
+    {
+        public required Guid Id { get; init; }
+        public required string Name { get; init; }
+        public required Guid OwnerId { get; init; }
+    }
 
     internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor) : IQueryHandler<Request, Response>
     {
@@ -24,7 +29,7 @@ public static class GetCommunity
 
             var response = await queryProcessor.Query<Community>()
                 .Where(c => c.Id == request.Id)
-                .Select(c => new Response(c.Id, c.Name, c.OwnerId))
+                .Select(c => new Response { Id = c.Id, Name = c.Name, OwnerId = c.OwnerId })
                 .FirstAsync();
 
             return Result<Response>.Success(response);

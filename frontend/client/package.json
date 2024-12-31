@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "prettier": "prettier src --check",
     "preview": "vite preview",
     "orval": "orval --config orval.config.cjs"
   },

@@ -9,10 +9,7 @@ public static class EditCommunity
 {
     public sealed record Command(Guid Id, string Name) : ICommand;
 
-    internal sealed class Handler(
-        IValidator<Command> validator,
-        IUnitOfWork unitOfWork,
-        ICommunityRepository communityRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, ICommunityRepository communityRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -25,10 +22,8 @@ public static class EditCommunity
             var (id, name) = command;
 
             var community = await communityRepository.GetByIdAsync(id);
-
             community.Name = name;
-
-            await unitOfWork.CommitAsync();
+            await communityRepository.UpdateAsync(community);
 
             return Result.Success();
         }

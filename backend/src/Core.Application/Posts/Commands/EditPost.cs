@@ -9,7 +9,7 @@ public static class EditPost
 {
     public sealed record Command(Guid Id, string Title, string Content) : ICommand;
 
-    internal sealed class Handler(IValidator<Command> validator, IUnitOfWork unitOfWork, IPostRepository postRepository) : ICommandHandler<Command>
+    internal sealed class Handler(IValidator<Command> validator, IPostRepository postRepository) : ICommandHandler<Command>
     {
         public async Task<Result> HandleAsync(Command command)
         {
@@ -26,7 +26,7 @@ public static class EditPost
             post.Title = title;
             post.Content = content;
 
-            await unitOfWork.CommitAsync();
+            await postRepository.UpdateAsync(post);
 
             return Result.Success();
         }

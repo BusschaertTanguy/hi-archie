@@ -1,23 +1,20 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import Button from "../../../../../../components/button.tsx";
 import FormTextAreaInput from "../../../../../../components/form-text-area-input.tsx";
 import {
   CommentsEnumsCommentVoteType,
-  CommentsQueriesGetCommentsResponse,
+  CommentsProjectionsCommentProjection,
+  CommentsQueriesGetCommentVotesResponse,
 } from "../../../../../../api/types";
 import { UseFormReturn } from "react-hook-form";
-import { CommentAction, CommentSchema } from "../index.lazy.tsx";
 import Voter from "../../../-components/voter.tsx";
-
-export interface CommentNode {
-  readonly children?: CommentNode[];
-  readonly comment: CommentsQueriesGetCommentsResponse;
-}
+import { CommentAction, CommentSchema } from "../-hooks/usePost.ts";
 
 interface CommentProps {
-  readonly node: CommentNode;
+  readonly comment: CommentsProjectionsCommentProjection;
   readonly form: UseFormReturn<CommentSchema>;
   readonly commentAction?: CommentAction;
+  readonly commentVotes?: CommentsQueriesGetCommentVotesResponse[];
   readonly onSubmitComment: (data: CommentSchema) => Promise<void>;
   readonly onCancelComment: () => void;
   readonly onSelectComment: (commentAction: CommentAction) => void;
@@ -28,9 +25,10 @@ interface CommentProps {
 }
 
 const Comment = ({
-  node,
+  comment,
   form,
   commentAction,
+  commentVotes,
   onSubmitComment,
   onSelectComment,
   onCancelComment,
@@ -42,32 +40,36 @@ const Comment = ({
     formState: { errors },
   } = form;
 
-  const { comment, children } = node;
+  const { id, content, comments, ownerId, up, down, publishDate } = comment;
+
+  const vote = useMemo(
+    () => commentVotes?.find((cv) => cv.commentId === id),
+    [commentVotes, id],
+  );
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col justify-around gap-2">
         <div className="flex gap-1 text-xs">
-          <span className="font-semibold">User: {comment.ownerId}</span>
+          <span className="font-semibold">User: {ownerId}</span>
           <span className="text-slate-500">
-            {new Date(comment.publishDate).toLocaleString()}
+            {new Date(publishDate).toLocaleString()}
           </span>
         </div>
-        <div>{comment.content}</div>
+        <div>{content}</div>
         <div className="flex gap-1.5">
           <Voter
-            votes={comment.up - comment.down}
-            onUp={() => onVote(comment.id, CommentsEnumsCommentVoteType.Upvote)}
-            onDown={() =>
-              onVote(comment.id, CommentsEnumsCommentVoteType.Downvote)
-            }
+            votes={up - down}
+            onUp={() => onVote(id, CommentsEnumsCommentVoteType.Upvote)}
+            onDown={() => onVote(id, CommentsEnumsCommentVoteType.Downvote)}
+            selectedType={vote?.type}
           />
           <span
             className="text-xs text-slate-500 hover:cursor-pointer hover:underline"
             onClick={() => {
               if (
                 commentAction?.action === "reply" &&
-                commentAction.comment.id === comment.id
+                commentAction.comment.id === id
               ) {
                 onCancelComment();
               } else {
@@ -82,7 +84,7 @@ const Comment = ({
             onClick={() => {
               if (
                 commentAction?.action === "edit" &&
-                commentAction.comment.id === comment.id
+                commentAction.comment.id === id
               ) {
                 onCancelComment();
               } else {
@@ -94,7 +96,7 @@ const Comment = ({
           </span>
         </div>
       </div>
-      {commentAction?.comment.id === comment.id && (
+      {commentAction?.comment.id === id && (
         <form
           className="flex flex-col gap-6 pt-3"
           onSubmit={handleSubmit(onSubmitComment)}
@@ -122,12 +124,13 @@ const Comment = ({
         </form>
       )}
       <div className="flex flex-col gap-3 border-l border-slate-300 pl-8">
-        {children?.map((childNode) => (
+        {comments.map((c) => (
           <Comment
-            key={childNode.comment.id}
-            node={childNode}
+            key={c.id}
+            comment={c}
             form={form}
             commentAction={commentAction}
+            commentVotes={commentVotes}
             onSubmitComment={onSubmitComment}
             onCancelComment={onCancelComment}
             onSelectComment={onSelectComment}

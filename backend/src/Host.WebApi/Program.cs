@@ -1,10 +1,11 @@
 using System.Net;
 using System.Text.Json.Serialization;
-using Common.Infrastructure.Data.Extensions;
+using Common.Infrastructure.EntityFramework.Extensions;
+using Common.Infrastructure.Neo4J.Extensions;
+using Common.Infrastructure.RabbitMq.Extensions;
 using Core.Application.Extensions;
 using Host.WebApi.Handlers;
 using Host.WebApi.Routes;
-using Host.WebApi.Transformers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,23 +13,49 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
 
-var connectionString = builder.Configuration.GetConnectionString("Postgres");
+// TODO: Options pattern
 
-if (string.IsNullOrEmpty(connectionString))
+var pgConnectionString = builder.Configuration.GetConnectionString("Postgres");
+if (string.IsNullOrEmpty(pgConnectionString))
 {
-    throw new InvalidOperationException("No connection string found.");
+    throw new InvalidOperationException("No pq connection string found.");
+}
+
+var rabbitMqConnectionString = builder.Configuration.GetConnectionString("RabbitMq");
+if (string.IsNullOrEmpty(rabbitMqConnectionString))
+{
+    throw new InvalidOperationException("No rabbitmq connection string found.");
 }
 
 var clientUrl = builder.Configuration.GetRequiredSection("Client:Url").Value;
-
 if (string.IsNullOrEmpty(clientUrl))
 {
     throw new InvalidOperationException("No client url found.");
 }
 
-builder.Services
-    .AddCommonInfrastructureData(connectionString)
-    .AddCoreApplication();
+var neo4JUrl = builder.Configuration.GetRequiredSection("Neo4J:Url").Value;
+if (string.IsNullOrEmpty(neo4JUrl))
+{
+    throw new InvalidOperationException("No neo4j url found.");
+}
+
+var neo4JUsername = builder.Configuration.GetRequiredSection("Neo4J:Username").Value;
+if (string.IsNullOrEmpty(neo4JUsername))
+{
+    throw new InvalidOperationException("No neo4j username found.");
+}
+
+var neo4JPassword = builder.Configuration.GetRequiredSection("Neo4J:Password").Value;
+if (string.IsNullOrEmpty(neo4JPassword))
+{
+    throw new InvalidOperationException("No neo4j password found.");
+}
+
+await builder.Services
+    .AddCoreApplication()
+    .AddCommonInfrastructureEntityFramework(pgConnectionString)
+    .AddCommonInfrastructureNeo4J(neo4JUrl, neo4JUsername, neo4JPassword)
+    .AddCommonInfrastructureRabbitMq(rabbitMqConnectionString);
 
 builder.Services.ConfigureHttpJsonOptions(options => { options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 builder.Services.Configure<JsonOptions>(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
@@ -38,20 +65,18 @@ builder.Services.AddCors(options => options.AddPolicy("ClientPolicy",
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddOpenApi(options =>
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options =>
     {
-        options.CreateSchemaReferenceId = info =>
-        {
-            string[] assemblyNames = ["Core.Application.", "Core.Domain."];
-            var fullName = info.Type.FullName?.Replace("+", ".") ?? string.Empty;
+        options.CustomSchemaIds(type => type.FullName?
+            .Replace("+", ".")
+            .Replace("Core.Application.", string.Empty)
+            .Replace("Core.Domain.", string.Empty)
+            .Replace("Microsoft.AspNetCore.Mvc.", string.Empty) ?? string.Empty);
 
-            return assemblyNames
-                .Where(assemblyName => fullName.StartsWith(assemblyName))
-                .Select(assemblyName => fullName.Replace(assemblyName, string.Empty))
-                .FirstOrDefault();
-        };
-
-        options.AddSchemaTransformer<OptionalPropertySchemaTransformer>();
+        options.UseAllOfToExtendReferenceSchemas();
+        options.SupportNonNullableReferenceTypes();
+        options.NonNullableReferenceTypesAsRequired();
     });
 }
 
@@ -79,8 +104,8 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.MapOpenApi();
-    app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "v1"); });
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {

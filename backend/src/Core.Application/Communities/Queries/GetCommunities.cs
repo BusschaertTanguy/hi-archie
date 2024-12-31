@@ -10,9 +10,18 @@ public static class GetCommunities
 {
     public sealed record Request(int PageIndex, int PageSize, string? Name) : IQuery<Response>;
 
-    public sealed record Dto(Guid Id, string Name, Guid OwnerId);
+    public sealed class Dto
+    {
+        public required Guid Id { get; init; }
+        public required string Name { get; init; }
+        public required Guid OwnerId { get; init; }
+    }
 
-    public sealed record Response(List<Dto> Communities, long Total);
+    public sealed class Response
+    {
+        public required List<Dto> Communities { get; init; }
+        public required long Total { get; init; }
+    }
 
     internal sealed class Handler(IValidator<Request> validator, IQueryProcessor queryProcessor)
         : IQueryHandler<Request, Response>
@@ -42,10 +51,10 @@ public static class GetCommunities
                 .OrderBy(c => c.Name)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
-                .Select(c => new Dto(c.Id, c.Name, c.OwnerId))
+                .Select(c => new Dto { Id = c.Id, Name = c.Name, OwnerId = c.OwnerId })
                 .ToListAsync();
 
-            return Result<Response>.Success(new(communities, total));
+            return Result<Response>.Success(new() { Communities = communities, Total = total });
         }
     }
 

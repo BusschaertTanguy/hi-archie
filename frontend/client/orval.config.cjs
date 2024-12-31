@@ -12,6 +12,6 @@ module.exports = {
                 },
             },
         },
-        input: "http://localhost:5400/openapi/v1.json",
+        input: "http://localhost:5400/swagger/v1/swagger.json",
     },
 };

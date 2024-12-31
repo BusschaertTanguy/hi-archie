@@ -9,7 +9,11 @@ public static class GetUserByExternalId
 {
     public sealed record Request(string ExternalId) : IQuery<Response?>;
 
-    public sealed record Response(Guid Id, IEnumerable<Guid> JoinedCommunities);
+    public sealed class Response
+    {
+        public required Guid Id { get; init; }
+        public required IEnumerable<Guid> JoinedCommunities { get; init; }
+    }
 
     internal sealed class Handler(IQueryProcessor queryProcessor) : IQueryHandler<Request, Response?>
     {
@@ -18,7 +22,7 @@ public static class GetUserByExternalId
             var user = await queryProcessor.Query<User>()
                 .Include(u => u.Subscriptions)
                 .Where(u => u.ExternalId == request.ExternalId)
-                .Select(u => new Response(u.Id, u.Subscriptions.Select(s => s.CommunityId)))
+                .Select(u => new Response { Id = u.Id, JoinedCommunities = u.Subscriptions.Select(s => s.CommunityId) })
                 .FirstOrDefaultAsync();
 
             return Result<Response?>.Success(user);
