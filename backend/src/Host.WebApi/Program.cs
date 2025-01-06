@@ -51,7 +51,7 @@ if (string.IsNullOrEmpty(neo4JPassword))
     throw new InvalidOperationException("No neo4j password found.");
 }
 
-await builder.Services
+builder.Services
     .AddCoreApplication()
     .AddCommonInfrastructureEntityFramework(pgConnectionString)
     .AddCommonInfrastructureNeo4J(neo4JUrl, neo4JUsername, neo4JPassword)

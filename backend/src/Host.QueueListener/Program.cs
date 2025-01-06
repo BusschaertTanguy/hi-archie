@@ -1,12 +1,10 @@
+using System.Reflection;
 using Common.Infrastructure.EntityFramework.Extensions;
 using Common.Infrastructure.Neo4J.Extensions;
 using Common.Infrastructure.RabbitMq.Extensions;
 using Core.Application.Extensions;
-using Host.QueueListener;
-using Host.QueueListener.ProjectionWriters;
 
 var builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<QueueListener>();
 
 var pgConnectionString = builder.Configuration.GetConnectionString("Postgres");
 if (string.IsNullOrEmpty(pgConnectionString))
@@ -38,13 +36,11 @@ if (string.IsNullOrEmpty(neo4JPassword))
     throw new InvalidOperationException("No neo4j password found.");
 }
 
-await builder.Services
+builder.Services
     .AddCoreApplication()
     .AddCommonInfrastructureEntityFramework(pgConnectionString)
     .AddCommonInfrastructureNeo4J(neo4JUrl, neo4JUsername, neo4JPassword)
-    .AddCommonInfrastructureRabbitMq(rabbitMqConnectionString);
-
-builder.Services.AddTransient<CommentProjectionWriter>();
+    .AddCommonInfrastructureRabbitMq(rabbitMqConnectionString, configuration => { configuration.AddConsumers(Assembly.GetExecutingAssembly()); });
 
 var host = builder.Build();
 host.Run();

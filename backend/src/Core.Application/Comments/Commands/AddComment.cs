@@ -40,7 +40,7 @@ public static class AddComment
             };
 
             await commentRepository.AddAsync(comment);
-            await asyncQueue.PublishAsync(CommentAdded.QueueName, new CommentAdded { Id = comment.Id });
+            await asyncQueue.PublishAsync(new CommentAdded { Id = comment.Id });
 
             return Result.Success();
         }

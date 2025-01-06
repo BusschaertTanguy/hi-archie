@@ -1,8 +1,9 @@
-﻿namespace Core.Application.Comments.Events;
+﻿using Common.Application.Models;
 
-public class CommentVoted
+namespace Core.Application.Comments.Events;
+
+public class CommentVoted : IAsyncMessage
 {
-    public const string QueueName = "comment-voted";
     public required Guid Id { get; init; }
     public required int UpChange { get; init; }
     public required int DownChange { get; init; }

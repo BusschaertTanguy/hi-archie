@@ -1,8 +1,7 @@
 ﻿using Common.Application.Queues;
-using Common.Infrastructure.RabbitMq.Constants;
+using Common.Infrastructure.RabbitMq.Configurations;
 using Common.Infrastructure.RabbitMq.Queues;
-using Core.Application.Comments.Events;
-using Core.Application.Posts.Events;
+using Common.Infrastructure.RabbitMq.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
@@ -10,20 +9,26 @@ namespace Common.Infrastructure.RabbitMq.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static async Task<IServiceCollection> AddCommonInfrastructureRabbitMq(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddCommonInfrastructureRabbitMq(this IServiceCollection services, string connectionString, Action<RabbitMqConfiguration>? configure = null)
     {
         var factory = new ConnectionFactory
         {
             Uri = new(connectionString)
         };
 
-        var connection = await factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
+        var configuration = new RabbitMqConfiguration();
+        configure?.Invoke(configuration);
 
-        foreach (var queue in RabbitMqConstants.Queues)
+        services.AddSingleton(configuration);
+
+        foreach (var consumer in configuration.Consumers)
         {
-            await channel.QueueDeclareAsync(queue, false, false, false);
+            services.AddTransient(consumer.Value.ConsumerType);
         }
+
+        var connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
+
+        services.AddHostedService<SingleConsumerWorker>();
 
         return services
             .AddSingleton(connection)

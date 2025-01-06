@@ -39,33 +39,33 @@ public static class VoteComment
                 };
 
                 await commentVoteRepository.AddAsync(vote);
-                await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+                await asyncQueue.PublishAsync(new CommentVoted
                 {
                     Id = vote.CommentId,
                     UpChange = vote.Type == CommentVoteType.Upvote ? 1 : 0,
                     DownChange = vote.Type == CommentVoteType.Downvote ? 1 : 0
                 });
-                
+
                 return Result.Success();
             }
-            
+
             if (vote.Type == command.Type)
             {
                 await commentVoteRepository.RemoveAsync(vote.CommentId, command.UserId);
-                await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+                await asyncQueue.PublishAsync(new CommentVoted
                 {
                     Id = vote.CommentId,
                     UpChange = vote.Type == CommentVoteType.Upvote ? -1 : 0,
                     DownChange = vote.Type == CommentVoteType.Downvote ? -1 : 0
                 });
-                
+
                 return Result.Success();
             }
-            
+
             vote.Type = command.Type;
-            
+
             await commentVoteRepository.UpdateAsync(vote);
-            await asyncQueue.PublishAsync(CommentVoted.QueueName, new CommentVoted
+            await asyncQueue.PublishAsync(new CommentVoted
             {
                 Id = vote.CommentId,
                 UpChange = vote.Type == CommentVoteType.Upvote ? 1 : -1,

@@ -47,7 +47,7 @@ public static class AddPost
             };
 
             await postRepository.AddAsync(post);
-            await asyncQueue.PublishAsync(PostAdded.QueueName, new PostAdded { Id = post.Id });
+            await asyncQueue.PublishAsync(new PostAdded { Id = post.Id });
 
             return Result.Success();
         }

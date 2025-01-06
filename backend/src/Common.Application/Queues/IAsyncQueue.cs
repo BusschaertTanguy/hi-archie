@@ -2,5 +2,5 @@
 
 public interface IAsyncQueue
 {
-    Task PublishAsync<T>(string queue, T message);
+    Task PublishAsync<T>(T message);
 }

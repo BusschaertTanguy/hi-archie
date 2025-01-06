@@ -1,7 +1,8 @@
-﻿namespace Core.Application.Comments.Events;
+﻿using Common.Application.Models;
 
-public class CommentEdited
+namespace Core.Application.Comments.Events;
+
+public class CommentEdited : IAsyncMessage
 {
-    public const string QueueName = "comment-edited";
     public required Guid Id { get; init; }
 }

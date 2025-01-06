@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
         <PackageReference Include="Neo4j.Driver" Version="5.27.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1"/>
         <PackageReference Include="RabbitMQ.Client" Version="7.0.0" />

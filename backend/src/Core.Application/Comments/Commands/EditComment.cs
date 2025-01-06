@@ -28,7 +28,7 @@ public static class EditComment
             comment.Content = content;
 
             await commentRepository.UpdateAsync(comment);
-            await asyncQueue.PublishAsync(CommentEdited.QueueName, new CommentEdited { Id = comment.Id });
+            await asyncQueue.PublishAsync(new CommentEdited { Id = comment.Id });
 
             return Result.Success();
         }

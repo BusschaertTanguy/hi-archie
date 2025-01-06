@@ -1,7 +1,8 @@
-﻿namespace Core.Application.Posts.Events;
+﻿using Common.Application.Models;
 
-public sealed class PostRemoved
+namespace Core.Application.Posts.Events;
+
+public sealed class PostRemoved : IAsyncMessage
 {
-    public const string QueueName = "post-removed";
     public required Guid Id { get; init; }
 }

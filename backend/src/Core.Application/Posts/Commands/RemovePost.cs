@@ -22,7 +22,7 @@ public static class RemovePost
             }
 
             await postRepository.RemoveAsync(command.Id);
-            await asyncQueue.PublishAsync(PostRemoved.QueueName, new PostRemoved
+            await asyncQueue.PublishAsync(new PostRemoved
             {
                 Id = command.Id
             });

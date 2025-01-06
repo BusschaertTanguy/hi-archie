@@ -1,7 +1,8 @@
-﻿namespace Core.Application.Posts.Events;
+﻿using Common.Application.Models;
 
-public sealed class PostAdded
+namespace Core.Application.Posts.Events;
+
+public sealed class PostAdded : IAsyncMessage
 {
-    public const string QueueName = "post-added";
     public required Guid Id { get; init; }
 }
