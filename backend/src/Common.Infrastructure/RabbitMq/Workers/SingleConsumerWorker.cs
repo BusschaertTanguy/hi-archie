@@ -48,7 +48,7 @@ internal sealed class SingleConsumerWorker(ILogger<SingleConsumerWorker> logger,
 
         var interfaceType = typeof(IProjectEvent<>);
 
-        foreach (var (key, consumer) in configuration.Consumers)
+        foreach (var (key, consumer) in configuration.Consumers.Where(c => c.Value.Batch == null))
         {
             var queue = await _channel.QueueDeclareAsync(key, true, false, false, cancellationToken: stoppingToken);
 
@@ -69,7 +69,7 @@ internal sealed class SingleConsumerWorker(ILogger<SingleConsumerWorker> logger,
                 string.Empty,
                 cancellationToken: stoppingToken
             );
-            
+
             var eventConsumer = new AsyncEventingBasicConsumer(_channel);
 
             eventConsumer.ReceivedAsync += async (_, ea) =>

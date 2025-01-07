@@ -3,6 +3,7 @@ using Common.Infrastructure.EntityFramework.Extensions;
 using Common.Infrastructure.Neo4J.Extensions;
 using Common.Infrastructure.RabbitMq.Extensions;
 using Core.Application.Extensions;
+using Host.QueueListener.ProjectionWriters;
 
 var builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
 
@@ -40,7 +41,18 @@ builder.Services
     .AddCoreApplication()
     .AddCommonInfrastructureEntityFramework(pgConnectionString)
     .AddCommonInfrastructureNeo4J(neo4JUrl, neo4JUsername, neo4JPassword)
-    .AddCommonInfrastructureRabbitMq(rabbitMqConnectionString, configuration => { configuration.AddConsumers(Assembly.GetExecutingAssembly()); });
+    .AddCommonInfrastructureRabbitMq(rabbitMqConnectionString, configuration =>
+    {
+        configuration.AddConsumers(Assembly.GetExecutingAssembly());
+        configuration.AddConsumer<CommentVotedConsumer>(consumer =>
+        {
+            consumer.Batch = new()
+            {
+                Delay = TimeSpan.FromSeconds(5),
+                Size = 3
+            };
+        });
+    });
 
 var host = builder.Build();
 host.Run();

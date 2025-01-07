@@ -28,7 +28,15 @@ public static class ServiceCollectionExtensions
 
         var connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
 
-        services.AddHostedService<SingleConsumerWorker>();
+        if (configuration.Consumers.Any(c => c.Value.Batch == null))
+        {
+            services.AddHostedService<SingleConsumerWorker>();
+        }
+
+        if (configuration.Consumers.Any(c => c.Value.Batch != null))
+        {
+            services.AddHostedService<BatchConsumerWorker>();
+        }
 
         return services
             .AddSingleton(connection)
