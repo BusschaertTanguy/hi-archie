@@ -46,73 +46,69 @@ internal sealed class SingleConsumerWorker(ILogger<SingleConsumerWorker> logger,
             return;
         }
 
-        var consumer = new AsyncEventingBasicConsumer(_channel);
         var interfaceType = typeof(IProjectEvent<>);
 
-        foreach (var (key, handler) in configuration.Consumers)
+        foreach (var (key, consumer) in configuration.Consumers)
         {
             var queue = await _channel.QueueDeclareAsync(key, true, false, false, cancellationToken: stoppingToken);
-            var messageInterfaces = handler.ConsumerType.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType);
 
-            foreach (var messageInterface in messageInterfaces)
+            var messageInterface = consumer.ConsumerType.GetInterfaces().Single(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType);
+            var messageInterfaceType = messageInterface.GenericTypeArguments.Single();
+            var messageName = messageInterfaceType.FullName?.ToKebabCase();
+
+            if (string.IsNullOrWhiteSpace(messageName))
             {
-                var messageType = messageInterface.GenericTypeArguments.Single();
-                var messageName = messageType.FullName?.ToKebabCase();
-                if (string.IsNullOrWhiteSpace(messageName))
-                {
-                    continue;
-                }
-
-                await _channel.ExchangeDeclareAsync(messageName, ExchangeType.Fanout, cancellationToken: stoppingToken);
-
-                await _channel.QueueBindAsync(
-                    queue.QueueName,
-                    messageName,
-                    string.Empty,
-                    cancellationToken: stoppingToken
-                );
+                continue;
             }
 
-            await _channel.BasicConsumeAsync(queue, false, consumer, stoppingToken);
+            await _channel.ExchangeDeclareAsync(messageName, ExchangeType.Fanout, true, cancellationToken: stoppingToken);
+
+            await _channel.QueueBindAsync(
+                queue.QueueName,
+                messageName,
+                string.Empty,
+                cancellationToken: stoppingToken
+            );
+            
+            var eventConsumer = new AsyncEventingBasicConsumer(_channel);
+
+            eventConsumer.ReceivedAsync += async (_, ea) =>
+            {
+                try
+                {
+                    var queueName = ea.ConsumerTag;
+
+                    if (!configuration.Consumers.TryGetValue(queueName, out var handlerType))
+                    {
+                        throw new InvalidOperationException($"Could not find handler for {queueName}");
+                    }
+
+                    await using var scope = serviceScopeFactory.CreateAsyncScope();
+                    var handler = scope.ServiceProvider.GetRequiredService(handlerType.ConsumerType);
+
+                    var body = ea.Body.ToArray();
+                    var message = JsonSerializer.Deserialize<EventData>(body) ?? throw new InvalidOperationException("Could not deserialize body");
+                    var messageType = Type.GetType(message.Type) ?? throw new InvalidOperationException("Could not deserialize type");
+                    var content = JsonSerializer.Deserialize(message.Content, messageType);
+
+                    var method = handlerType.ConsumerType.GetMethod(nameof(IProjectEvent<object>.HandleAsync), [messageType]) ??
+                                 throw new InvalidOperationException("Could not find handler method");
+
+                    if (method.Invoke(handler, [content]) is Task task)
+                    {
+                        await task;
+                    }
+
+                    await _channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, e.Message);
+                    await _channel.BasicNackAsync(ea.DeliveryTag, false, true, stoppingToken);
+                }
+            };
+
+            await _channel.BasicConsumeAsync(queue, false, queue.QueueName, eventConsumer, stoppingToken);
         }
-
-        consumer.ReceivedAsync += async (model, ea) =>
-        {
-            try
-            {
-                if (model is not AsyncEventingBasicConsumer consumerModel || string.IsNullOrWhiteSpace(consumerModel.Channel.CurrentQueue))
-                {
-                    throw new InvalidOperationException($"Consumer model is not of type {nameof(AsyncEventingBasicConsumer)}");
-                }
-
-                if (!configuration.Consumers.TryGetValue(consumerModel.Channel.CurrentQueue, out var handlerType))
-                {
-                    throw new InvalidOperationException($"Could not find handler for {consumerModel.Channel.CurrentQueue}");
-                }
-
-                await using var scope = serviceScopeFactory.CreateAsyncScope();
-                var handler = scope.ServiceProvider.GetRequiredService(handlerType.ConsumerType);
-
-                var body = ea.Body.ToArray();
-                var message = JsonSerializer.Deserialize<EventData>(body) ?? throw new InvalidOperationException("Could not deserialize body");
-                var messageType = Type.GetType(message.Type) ?? throw new InvalidOperationException("Could not deserialize type");
-                var content = JsonSerializer.Deserialize(message.Content, messageType);
-
-                var method = handlerType.ConsumerType.GetMethod(nameof(IProjectEvent<object>.HandleAsync), [messageType]) ??
-                             throw new InvalidOperationException("Could not find handler method");
-
-                if (method.Invoke(handler, [content]) is Task task)
-                {
-                    await task;
-                }
-
-                await _channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, e.Message);
-                await _channel.BasicNackAsync(ea.DeliveryTag, false, true, stoppingToken);
-            }
-        };
     }
 }

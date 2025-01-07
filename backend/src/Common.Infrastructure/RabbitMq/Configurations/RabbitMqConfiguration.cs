@@ -25,7 +25,7 @@ public sealed class RabbitMqConfiguration
         AddConsumer(typeof(T), configure);
     }
 
-    public void AddConsumer(Type type, Action<RabbitMqConsumer>? configure = null)
+    private void AddConsumer(Type type, Action<RabbitMqConsumer>? configure = null)
     {
         var consumerName = type.FullName.ToKebabCase();
 
@@ -42,6 +42,12 @@ public sealed class RabbitMqConfiguration
         else
         {
             configure?.Invoke(consumer);
+        }
+
+        var interfaceType = typeof(IProjectEvent<>);
+        if (consumer.ConsumerType.GetInterfaces().Count(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceType) > 1)
+        {
+            throw new InvalidOperationException($"{interfaceType} can only be implemented once per class");
         }
     }
 }

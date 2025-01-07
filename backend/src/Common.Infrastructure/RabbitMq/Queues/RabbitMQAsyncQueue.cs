@@ -25,7 +25,7 @@ internal sealed class RabbitMqAsyncQueue(IConnection connection) : IAsyncQueue
         };
 
         var exchange = typeof(T).FullName.ToKebabCase();
-        await _channel.ExchangeDeclareAsync(exchange, ExchangeType.Fanout);
-        await _channel.BasicPublishAsync(exchange, string.Empty, true, properties, body);
+        await _channel.ExchangeDeclareAsync(exchange, ExchangeType.Fanout, true);
+        await _channel.BasicPublishAsync(exchange, string.Empty, false, properties, body);
     }
 }
