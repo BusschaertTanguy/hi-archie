@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text.Json;
 using Common.Application.Projections;
 using Common.Infrastructure.Extensions;
@@ -16,8 +17,8 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
     : BackgroundService
 {
     private readonly Dictionary<string, IChannel> _channels = new();
-    private readonly Dictionary<string, List<Entry>> _queueBatches = new();
-    private readonly Dictionary<string, CancellationTokenSource> _queueTimerCancellations = new();
+    private readonly ConcurrentDictionary<string, ConcurrentBag<Entry>> _queueBatches = new();
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _queueTimerCancellations = new();
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
@@ -181,7 +182,7 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
         }
         finally
         {
-            _queueTimerCancellations.Remove(queueName);
+            _queueTimerCancellations.Remove(queueName, out _);
             logger.LogInformation("Processing of batch for {queueName} successful", queueName);
         }
     }

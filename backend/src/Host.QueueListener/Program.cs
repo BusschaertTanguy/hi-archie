@@ -48,8 +48,8 @@ builder.Services
         {
             consumer.Batch = new()
             {
-                Delay = TimeSpan.FromSeconds(5),
-                Size = 3
+                Size = 100,
+                Delay = TimeSpan.FromSeconds(5)
             };
         });
     });
