@@ -15,7 +15,8 @@ internal sealed class Neo4JCommentProjectionReader(IDriver driver) : ICommentPro
                 "MATCH path=(post:POST {id: $id})<-[:IS_COMMENT_OF*1..]-() " +
                 "WITH nodes(path) as nodes " +
                 "WITH nodes[size(nodes)-2] AS parent, nodes[size(nodes)-1] AS child " +
-                "RETURN child.id, parent.id, child.up, child.down, child.content, child.publishDate, child.ownerId;", new { id = postId.ToString() });
+                "RETURN child.id, parent.id, child.up, child.down, child.content, child.publishDate, child.ownerId " +
+                "ORDER BY (child.up - child.down) DESC", new { id = postId.ToString() });
 
             return await response.ToListAsync();
         });
