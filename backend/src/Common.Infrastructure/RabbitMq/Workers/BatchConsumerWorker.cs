@@ -17,6 +17,7 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
     : BackgroundService
 {
     private readonly Dictionary<string, IChannel> _channels = new();
+    private readonly Dictionary<string, SemaphoreSlim> _locks = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<Entry>> _queueBatches = new();
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _queueTimerCancellations = new();
 
@@ -37,6 +38,11 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
             channel.Dispose();
         }
 
+        foreach (var mutex in _locks.Values)
+        {
+            mutex.Dispose();
+        }
+
         base.Dispose();
     }
 
@@ -55,6 +61,7 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
             await channel.BasicQosAsync(0, consumer.Batch.Size, false, stoppingToken);
 
             _channels[key] = channel;
+            _locks.Add(key, new(1, 1));
 
             var queue = await channel.QueueDeclareAsync(key, true, false, false, cancellationToken: stoppingToken);
             _queueBatches[key] = [];
@@ -131,8 +138,17 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
     {
         logger.LogInformation("Processing of batch for {queueName} started", queueName);
 
+        var @lock = _locks[queueName];
+        await @lock.WaitAsync();
+
         var channel = _channels[queueName];
         var batch = _queueBatches[queueName];
+
+        if (batch.IsEmpty)
+        {
+            return;
+        }
+
         var lastEntry = batch.LastOrDefault();
 
         if (lastEntry == null)
@@ -183,6 +199,7 @@ internal sealed class BatchConsumerWorker(ILogger<BatchConsumerWorker> logger, I
         finally
         {
             _queueTimerCancellations.Remove(queueName, out _);
+            @lock.Release();
             logger.LogInformation("Processing of batch for {queueName} successful", queueName);
         }
     }
